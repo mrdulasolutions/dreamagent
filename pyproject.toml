@@ -1,11 +1,29 @@
 [project]
 name = "dreamagent"
 version = "0.0.1"
-description = "Nightly LoRA consolidation of agent memories into model weights."
+description = "Nightly LoRA consolidation of agent memories into language model weights — the dreaming AI."
 readme = "README.md"
 requires-python = ">=3.12"
-license = { text = "MIT" }
-authors = [{ name = "mrdulasolutions" }]
+license = { text = "Apache-2.0" }
+authors = [{ name = "Mr Dula Solutions", email = "noreply@mrdula.solutions" }]
+keywords = [
+    "lora", "fine-tuning", "agent-memory", "continual-learning",
+    "catastrophic-forgetting", "mlx", "apple-silicon", "llm",
+    "parametric-memory", "knowledge-consolidation",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
 
 dependencies = [
     "pydantic>=2.9",
@@ -14,7 +32,18 @@ dependencies = [
     "mlx-lm>=0.22",
 ]
 
+[project.urls]
+Homepage = "https://github.com/mrdulasolutions/dreamagent"
+Repository = "https://github.com/mrdulasolutions/dreamagent"
+Issues = "https://github.com/mrdulasolutions/dreamagent/issues"
+Documentation = "https://github.com/mrdulasolutions/dreamagent#readme"
+Changelog = "https://github.com/mrdulasolutions/dreamagent/blob/main/CHANGELOG.md"
+
 [project.optional-dependencies]
+anthropic = ["anthropic>=0.40"]
+openai = ["openai>=1.50"]
+ollama = ["ollama>=0.3"]
+all-extractors = ["anthropic>=0.40", "openai>=1.50", "ollama>=0.3"]
 dev = [
     "pytest>=8.3",
     "pytest-cov>=6.0",
@@ -38,6 +67,10 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "N", "SIM", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+# typer.Option/.Argument in defaults is the documented API surface, not a bug
+"src/dreamagent/cli.py" = ["B008"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
