@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+*.egg
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# uv / virtualenvs
+.venv/
+venv/
+env/
+.python-version
+
+# Editor
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# macOS AppleDouble files (external drive metadata)
+._*
+
+# Models, adapters, training artifacts — too large for git
+models/
+adapters/
+runs/
+checkpoints/
+*.safetensors
+*.gguf
+*.bin
+
+# Local data / secrets
+.env
+.env.local
+data/
+memories/local/
+*.jsonl.local
