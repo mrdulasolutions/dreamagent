@@ -377,6 +377,56 @@ def rollback(
 
 
 @app.command()
+def serve(
+    base_model: str | None = typer.Option(
+        None,
+        help=("Base model. Overrides $DREAMAGENT_BASE_MODEL. "
+              "Default: locked V1 production model."),
+    ),
+    snapshots_dir: Path | None = typer.Option(
+        None,
+        help=("Snapshots directory containing `live`. Overrides "
+              "$DREAMAGENT_SNAPSHOTS_DIR. Default: ./runs/snapshots"),
+    ),
+    max_tokens: int | None = typer.Option(
+        None,
+        help="Max tokens per query response. Overrides $DREAMAGENT_MAX_TOKENS.",
+    ),
+) -> None:
+    """Start the MCP server (V2.0 alpha) exposing the dreamed model as a
+    memory backend over stdio.
+
+    Any MCP-capable client (Claude Code, Cursor, Hermes, etc.) can install
+    DreamAgent as an MCP server via their `mcpServers` config and gain a
+    `query_memory` tool that answers from the user's dreamed weights.
+
+    Configuration: precedence is CLI flag > env var > default. See
+    `src/dreamagent/serve/mcp.py` for the env var names.
+
+    Examples:
+        dreamagent serve
+        DREAMAGENT_SNAPSHOTS_DIR=~/runs/snapshots dreamagent serve
+        dreamagent serve --snapshots-dir ~/runs/snapshots
+    """
+    import os
+
+    if base_model is not None:
+        os.environ["DREAMAGENT_BASE_MODEL"] = base_model
+    if snapshots_dir is not None:
+        os.environ["DREAMAGENT_SNAPSHOTS_DIR"] = str(snapshots_dir.resolve())
+    if max_tokens is not None:
+        os.environ["DREAMAGENT_MAX_TOKENS"] = str(max_tokens)
+
+    try:
+        from dreamagent.serve import run_stdio
+    except RuntimeError as e:
+        console.print(f"[red]{e}[/red]")
+        raise typer.Exit(code=2) from None
+
+    run_stdio()
+
+
+@app.command()
 def drill(
     nights: int = typer.Option(7, help="Number of consecutive nights to simulate."),
     source: str = typer.Option("fixture:v1_baseline", help="Memory source."),
