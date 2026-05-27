@@ -64,18 +64,27 @@ HTTP, or in-process. The dreamed model is "the guy who knows."
   with real Claude Code / Cursor configs
 - ⏳ Live connection test against a real Claude Code install (user-side)
 
-### V2.1 — HTTP API + benchmark wins  ·  Target: September 2026
+### V2.1 — HTTP API + head-to-head baselines  ·  Status: ✅ partial (May 2026)
 
-- `dreamagent serve --http` exposes the same surface over HTTP
-- Cross-memory-reasoning benchmark shows ≥ 10pp advantage over a
-  vector-retrieval baseline running on the same memories
-- Query latency benchmark shows p95 < 500ms on Mac Mini M4
+- ✅ `dreamagent serve --transport http` exposes the same surface over HTTP
+- ✅ Vector-retrieval baseline built and benchmarked
+- ❌ **Cross-memory ≥10pp advantage over retrieval: not achieved.** Result
+  was parity (0.0pp). See [`docs/tuning/v2.1-vs-baselines.md`](docs/tuning/v2.1-vs-baselines.md).
+  The +6.2pp personal-recall advantage holds.
+- ✅ `query_memory(question, concise=True)` flag for lower-latency responses
+- ⏳ Query latency p95 < 500ms — still 1-2s; concise mode improves but
+  doesn't hit target. Likely needs smaller production tier model.
 
-### V2.2 — Production hardening  ·  Target: November 2026
+The unmet target on the cross-memory advantage drives the V2.2 reframe.
 
+### V2.2 — Composition + production hardening  ·  Status: critical (May 2026 update)
+
+After the V2.1 head-to-head showed retrieval matching DreamAgent on cross-memory reasoning, **the composition story is no longer optional**:
+
+- **mem0 + DreamAgent composition cookbook** (run both, reconcile at agent) — promoted from polish to V2.2's primary deliverable
+- Adversarial probe set where retrieval is forced to fail (semantic-distance attacks)
 - Adapter signing for trust
 - Multi-user namespacing
-- mem0 + DreamAgent composition cookbook (run both, reconcile at agent)
 
 ---
 

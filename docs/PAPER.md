@@ -11,9 +11,11 @@
 
 Existing AI agent memory systems (mem0, Letta, Supermemory, Zep) consolidate captured memories into retrievable text via vector indexes, knowledge graphs, or hierarchical memory blocks. We propose **MORPHEUS** — Memory Overnight Re-parameterization, Promotion via Held-out Eval, Update Snapshots — a methodology that consolidates structured agent memories directly into the **weights** of a small open-source language model via nightly LoRA fine-tuning. A four-decision eval gate (PROMOTE / PROMOTE_WITH_WARNING / REJECT / REJECT-low-recall) protects against catastrophic forgetting; per-night adapter snapshots enable one-command rollback.
 
-We validate MORPHEUS on Llama 3.2 1B Instruct and Llama 3.1 8B Instruct using a 50-item structured memory fixture, a 30-item general-capability probe set, and a 10-item cross-memory reasoning probe set we designed to require multi-memory synthesis. Across a 7-night chained-training drill on Llama 3.1 8B (each night resuming from the prior night's adapter), all 7 nights were promoted by the gate; personal recall climbed from 43.8% to 81.3% before plateauing; general capability regression remained bounded at 0–13.3pp and never breached the 15pp rejection threshold. On the final night-7 adapter, cross-memory reasoning improved from 30% (base) to 90% (adapter), a +60 percentage point delta. Query latency on Apple Silicon Mac Mini-class hardware: p50 = 1.08s, p95 = 2.25s, p99 = 2.27s for 48-token responses.
+We validate MORPHEUS on Llama 3.2 1B Instruct and Llama 3.1 8B Instruct using a 50-item structured memory fixture, a 30-item general-capability probe set, and a 10-item cross-memory reasoning probe set. Across a 7-night chained-training drill on Llama 3.1 8B (each night resuming from the prior night's adapter), all 7 nights were promoted by the gate; personal recall climbed from 43.8% to 81.3% before plateauing; general capability regression remained bounded at 0–13.3pp and never breached the 15pp rejection threshold. On the final night-7 adapter, personal recall reached 75% and cross-memory reasoning reached 90%.
 
-We discuss what these results do and do not demonstrate, document six transferable tuning lessons learned across 30+ tuning runs, and pre-emptively enumerate limitations including small evaluation sets, author-designed cross-memory probes, the compressed 7-night drill (relative to the planned 30-night Pass 3), and the absence of a measured head-to-head comparison against retrieval-based baselines. All numbers are reproducible from the published reference implementation.
+**A V2.1 head-to-head against a vector-retrieval baseline running on the same base model and same memories changes the picture materially.** DreamAgent retains a modest +6.2pp personal-recall advantage but **achieves parity (0.0pp difference) on cross-memory reasoning** when compared against base+retrieval — a result we had pre-registered (§10.5) as weakening the parametric-advantage claim. We publish the result with the correction. The revised V2 positioning emphasizes complementarity with retrieval rather than replacement: DreamAgent for durable, privacy-bound, host-agent-independent memory; retrieval for hot, mutable, deletion-instant memory. Composition with mem0 (originally a V2.2 polish item) is promoted to a critical V2 deliverable.
+
+We discuss what these results do and do not demonstrate, document six transferable tuning lessons learned across 30+ tuning runs, and enumerate limitations including small evaluation sets, single-language fixtures, the compressed 7-night drill, and the dependence of cross-memory comparison on probe-set design. All numbers are reproducible from the published reference implementation.
 
 **Keywords:** agent memory, continual learning, LoRA, catastrophic forgetting, MLX, Apple Silicon, parametric memory, knowledge consolidation, sleep-inspired learning.
 
@@ -313,11 +315,24 @@ Run via `python -m benchmarks.<name>` (reproducible):
 |---|---|---|
 | `personal_recall` | Pass rate on 48 held-out probes | **75.0%** (36/48) |
 | `general_capability` | Adapter pass rate (vs 96.67% base) | 90.0% (27/30); **−6.7pp** regression |
-| `cross_memory_reasoning` | Adapter pass rate (vs 30.0% base) | **90.0%** (9/10); **+60pp** improvement |
+| `cross_memory_reasoning` | Adapter pass rate vs base-only baseline | 90.0% (9/10); +60pp vs *base alone* (see §6.6) |
 | `query_latency` | p50 / p95 / p99 for 48-token responses | 1.08s / 2.25s / 2.27s |
 | `identity_drift` | Adapter pass rate (vs 62.5% base) | 75.0% (6/8); **−12.5pp** drift = improvement |
 
-### 6.5 Transferable tuning lessons
+### 6.5 V2.1 head-to-head vs vector-retrieval baseline
+
+Subsequent to §6.4, we built a vector-retrieval baseline (`sentence-transformers/all-MiniLM-L6-v2` + top-5 retrieval + same base model for generation) and re-ran the same probes through both systems. The full protocol and result is published at `docs/tuning/v2.1-vs-baselines.md`. Headline:
+
+| Probe set | DreamAgent | Retrieval baseline | Δ |
+|---|---|---|---|
+| `personal_recall` | 75.0% (36/48) | 68.8% (33/48) | **+6.2pp** |
+| `cross_memory_reasoning` | 90.0% (9/10) | 90.0% (9/10) | **+0.0pp** |
+
+This is a material weakening of the cross-memory-reasoning claim in §6.4. When the retrieval step surfaces all required memories (which top-5 on a 50-memory corpus largely permits for our 10 hand-authored probes), the base model can synthesize across them in context as well as the parametric adapter does.
+
+The +6.2pp personal-recall advantage replicates; the cross-memory advantage as previously framed does not. See §7.1 for the consequent reframing.
+
+### 6.6 Transferable tuning lessons
 
 Six lessons we identified across 30+ tuning runs on two base models (documented in `docs/tuning/README.md`):
 
@@ -332,11 +347,17 @@ Six lessons we identified across 30+ tuning runs on two base models (documented 
 
 ## 7. Discussion
 
-### 7.1 What the cross-memory result demonstrates
+### 7.1 What the cross-memory result demonstrates (revised after §6.5)
 
-The +60pp delta (30% base → 90% adapter) on cross-memory reasoning is the strongest positive result in the V1 evaluation suite. It directly evidences the central MORPHEUS thesis: a model that has been trained on a set of memories simultaneously can synthesize across them in one shot, in a way a single forward pass through a retrieval-augmented system cannot.
+The original V1 framing of this section claimed the +60pp delta (30% base → 90% adapter) evidenced "the central MORPHEUS thesis: a model trained on memories simultaneously can synthesize across them in one shot, in a way a single forward pass through a retrieval-augmented system cannot."
 
-The base model's 30% baseline is informative: the questions are answerable from general world knowledge alone with some probability. The adapter clearing 90% on the same 10 questions evidences that the model has integrated the trained memories into a coherent representation.
+The §6.5 head-to-head against a vector-retrieval baseline retracts the second clause. A retrieval system *can* satisfy these probes in a single forward pass, provided the retrieval step surfaces the required memories. On a 50-memory corpus with top-5 retrieval, this is nearly always the case for our 10 hand-authored probes.
+
+The revised, defensible claim is narrower: **the adapter and the retrieval system match on cross-memory reasoning when retrieval recall is high.** Where DreamAgent retains a measurable advantage is on personal-recall probes (+6.2pp), where the adapter's "always-on" knowledge of a specific memory outperforms the retrieval system's k-nearest-neighbor coverage.
+
+The 30% base-only baseline is still informative: it characterizes what the base model knows from general world knowledge alone. But it is the wrong reference point against which to claim a parametric-memory advantage.
+
+We hypothesize (untested here; flagged as future work in §10.4) that retrieval-based systems lose ground to parametric memory in regimes where: (a) the corpus is very large and top-k coverage drops below ~80%; (b) probes are adversarial — query embeddings have large semantic distance from the relevant memory's wording; (c) the agent needs persistent identity / persona; (d) privacy requirements forbid an external index altogether. None of these are demonstrated in V1 or V2.1.
 
 ### 7.2 What the identity-drift result demonstrates
 
@@ -388,9 +409,13 @@ The 30-night Pass 3 originally planned was compressed to 7 nights for V1 deliver
 
 The 10 cross-memory probes (`benchmarks/probes/cross_memory_reasoning.jsonl`) were authored by the same person who authored the methodology. There is an inherent risk of probes being constructed (consciously or unconsciously) to favor MORPHEUS. We mitigate by publishing the probe-to-memory mapping; the constructions are inspectable.
 
-### 8.5 No measured comparison to retrieval baselines
+### 8.5 Comparison to retrieval baselines — measured at V2.1; result weakens earlier claim
 
-We did not run mem0 or Letta on the same memories and benchmark them on the same cross-memory probes. The architectural argument that retrieval cannot satisfy multi-memory synthesis in one shot is theoretically sound but empirically untested. V2.1's `vs_baselines/` benchmark scaffold is the planned remediation.
+§6.5 reports the V2.1 head-to-head. A simple vector-retrieval baseline (sentence-transformers + top-5 + same base model) achieved parity with DreamAgent on cross-memory reasoning (90% / 90%). The architectural argument that retrieval cannot satisfy multi-memory synthesis in one shot is empirically *false* under conditions where retrieval recall is high.
+
+We have not yet compared against mem0, Letta, or Zep specifically — that work is V2.2. Our simple baseline is almost certainly weaker than what a serious agent harness with filesystem tools delivers (per Letta's own benchmarking [\[10\]](https://www.letta.com/blog/benchmarking-ai-agent-memory)), so head-to-head numbers against production memory systems would likely show DreamAgent losing on retrieval-style probes by even more.
+
+The corrected positioning: DreamAgent and retrieval are complementary, not competitive. See §7.1 (revised) and §10 for consequences.
 
 ### 8.6 Single base model at production tier
 
@@ -510,22 +535,26 @@ The full set of pinned versions is in `uv.lock`.
 
 ### 10.5 Methodology critiques we'd accept
 
-We anticipate and would weight these critiques:
+We anticipated four critiques in the V1 draft. The V2.1 head-to-head experiment (§6.5) materialized one of them, and we have updated §1, §6.4, §7.1, and §8.5 accordingly:
 
-- A reproducible run on the published recipe yielding > 15pp general regression would falsify the stability claim.
-- A retrieval baseline (mem0 with a strong agent harness) scoring > 50% on our cross-memory probe set would weaken the parametric-advantage claim.
-- Drift signal detected over 30 chained nights would constrain V1's deployability.
-- Demonstrating that the cross-memory probes are passable via a single ~10k-token context-stuffing prompt to the base model would weaken the parametric-advantage claim (we believe it would, but only at frontier-class context cost).
+- ✅ **Realized:** A retrieval baseline scoring > 50% on our cross-memory probe set. The actual result: 90% — parity with DreamAgent. The cross-memory parametric-advantage claim is therefore weakened; the corrected positioning emphasizes complementarity with retrieval (V2.2).
+- A reproducible run on the published recipe yielding > 15pp general regression would falsify the stability claim. (Untriggered in 7-night drill; not falsified.)
+- Drift signal detected over 30 chained nights would constrain V1's deployability. (Compressed Pass 3 only ran 7 nights; this would require V2.2 work.)
+- Demonstrating that the cross-memory probes are passable via context-stuffing the base model would weaken the parametric-advantage claim. (Implied by §6.5 — the retrieval baseline is essentially a structured form of this.)
+
+The team committed in writing in the V1 draft that surfacing such a result would update positioning publicly rather than be buried. The V2.1 documentation (`docs/tuning/v2.1-vs-baselines.md`) and the §1/§6.5/§7.1/§8.5 revisions in this paper are that update, published in the same commit as the V2.1 work itself.
 
 ---
 
 ## 11. Conclusion
 
-We presented **MORPHEUS**, a seven-stage methodology for consolidating structured agent memories into the weights of a small language model via nightly LoRA fine-tuning with eval-gated promotion. We validated it on Llama 3.2 1B Instruct and Llama 3.1 8B Instruct, demonstrated stability across a 7-night chained-training drill (all 7 nights promoted, zero rejects), and measured a +60 percentage-point advantage of the dreamed adapter over the base model on cross-memory reasoning probes designed to require multi-memory synthesis.
+We presented **MORPHEUS**, a seven-stage methodology for consolidating structured agent memories into the weights of a small language model via nightly LoRA fine-tuning with eval-gated promotion. We validated it on Llama 3.2 1B Instruct and Llama 3.1 8B Instruct, and demonstrated stability across a 7-night chained-training drill (all 7 nights promoted, zero rejects).
+
+A V2.1 head-to-head experiment against a vector-retrieval baseline running on the same memories and the same base model retracts the strongest version of the cross-memory-reasoning claim from V1. DreamAgent retains a modest, real **+6.2pp personal-recall advantage** over the baseline. On cross-memory reasoning, the two systems are at **parity (0.0pp)** — retrieval-augmented inference can satisfy multi-memory synthesis probes when retrieval recall is high. The methodologically significant point is that we pre-registered this exact result as falsifiable in §10.5 of the V1 draft and published the retraction in the same commit as the new measurement.
 
 The methodology is open-source (Apache 2.0, attribution required per `NOTICE`), the reference implementation (`DreamAgent`) is reproducible from a fresh clone, and every number in this paper is regeneratable via a single `python -m benchmarks.<name>` invocation against the published recipe.
 
-The headline empirical result is the +60pp cross-memory reasoning delta — interpretable as evidence that the model has integrated the trained memories into a single coherent representation in a way single-pass retrieval cannot replicate. The headline methodological contribution is the four-decision eval-gated promotion scheme combined with per-night adapter snapshots, which together make autonomous nightly training safe enough to deploy without human review of each run.
+**The headline contribution is methodological, not empirical:** the four-decision eval-gated promotion scheme combined with per-night adapter snapshots makes autonomous nightly training safe enough to deploy without human review of each run. The empirical advantages over baselines are narrower than initially framed but real — and the V2.2 composition-with-retrieval architecture is where DreamAgent's actual value proposition lives.
 
 We invite reproduction, criticism, and falsification.
 

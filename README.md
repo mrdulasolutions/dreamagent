@@ -162,11 +162,9 @@ This sets up your computer to automatically "dream" at 3 AM every night. Each mo
 
 ## Does it actually work?
 
-Yes. We measured it. Here are the numbers:
+Honest answer: **yes, but with a more nuanced story than we originally claimed.**
 
-**The big one:** On questions that require connecting multiple memories together — like *"Given what the user has told me about their projects AND their preferred tools, what command would they likely use to test this?"* — the small AI without dreaming scores **30%**. After dreaming, it scores **90%**. That's a 3× improvement, and it's the kind of question vector-search memory systems literally cannot answer in one shot.
-
-**Other numbers from the night-7 adapter** (after 7 consecutive nights of "dreaming"):
+### What we measured (night-7 adapter)
 
 | Test | Result |
 |---|---|
@@ -175,7 +173,22 @@ Yes. We measured it. Here are the numbers:
 | How fast does it answer? | About 1 second per question on Mac |
 | Did it forget it's an assistant? | Actually got *better* at being an assistant (+12.5%) |
 
-The 7-night stability test: every single night promoted, zero failures. The full data is in [`docs/tuning/llama-3.1-8b-instruct-4bit.md`](docs/tuning/llama-3.1-8b-instruct-4bit.md).
+The 7-night stability test: every single night promoted, zero failures. Full data: [`docs/tuning/llama-3.1-8b-instruct-4bit.md`](docs/tuning/llama-3.1-8b-instruct-4bit.md).
+
+### Head-to-head vs vector-retrieval (V2.1, the honest comparison)
+
+We initially framed a +60pp cross-memory-reasoning result as DreamAgent's headline. **That comparison was against the base model with no memory access** — not against a fair retrieval baseline. When we built a real comparison (sentence-transformers + top-5 → same base model), the picture is more humble:
+
+| Probe set | DreamAgent | Retrieval baseline | DreamAgent advantage |
+|---|---|---|---|
+| Personal recall | 75.0% | 68.8% | **+6.2pp** |
+| Cross-memory reasoning | 90.0% | 90.0% | **+0.0pp** |
+
+DreamAgent has a modest, real personal-recall advantage. The cross-memory parity result means retrieval-based memory systems can synthesize across memories at least as well as the dreamed model, when the right memories are retrieved. We retracted the "3× improvement" framing.
+
+What DreamAgent still uniquely offers: **privacy** (no external index), **host-agent independence** (works with any MCP client), and **immunity to retrieval failures**. The V2 thesis is therefore "DreamAgent + retrieval, composed" — not "DreamAgent replaces retrieval." Details: [`docs/tuning/v2.1-vs-baselines.md`](docs/tuning/v2.1-vs-baselines.md).
+
+We publish this retraction in the same commit as the new claim, on purpose.
 
 ---
 

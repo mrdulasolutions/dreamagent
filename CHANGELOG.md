@@ -9,6 +9,17 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- **V2.1 — vector-retrieval baseline + head-to-head benchmark.** New
+  `benchmarks/vs_baselines.py` runs the same memories + probes through
+  DreamAgent and a sentence-transformers + top-5 retrieval baseline using
+  the same base model. Result: DreamAgent retains a modest +6.2pp
+  personal-recall advantage but achieves **parity** (0.0pp) on cross-memory
+  reasoning. See "Changed" below for the resulting positioning retraction.
+- **V2.1 — HTTP transport for MCP.** `dreamagent serve --transport http`
+  starts a streamable-http MCP server; useful for shared/multi-client
+  deployments.
+- **V2.1 — `concise` flag on `query_memory`** for ~3x lower latency
+  responses (24-token cap, one-sentence-or-less system-prompt nudge).
 - **V2.0 alpha — MCP server.** `dreamagent serve` exposes the live dreamed
   adapter as a Model Context Protocol server over stdio. Any MCP-capable
   client (Claude Code, Cursor, Hermes, OpenClaw) can install DreamAgent and
@@ -17,6 +28,20 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   it needs to know what the user has told it. Configured via env vars
   (`DREAMAGENT_BASE_MODEL`, `DREAMAGENT_SNAPSHOTS_DIR`, `DREAMAGENT_MAX_TOKENS`).
   Optional dependency `dreamagent[mcp]`.
+
+### Changed
+
+- **Cross-memory reasoning claim retracted and revised.** The V1 benchmark
+  suite reported +60pp cross-memory reasoning improvement (base 30% →
+  adapter 90%). That comparison was vs the base model with no memory
+  access. The V2.1 vs-baselines experiment showed a retrieval-augmented
+  baseline matches DreamAgent at 90% on the same probes. The README,
+  PAPER §1/§6.4/§7.1/§8.5/§10.5, and ROADMAP V2.1/V2.2 are all revised
+  to reflect this. The +6.2pp personal-recall advantage is real and
+  remains. Detail:
+  [`docs/tuning/v2.1-vs-baselines.md`](docs/tuning/v2.1-vs-baselines.md).
+- **ROADMAP V2.2:** mem0 + DreamAgent composition cookbook promoted from
+  polish to the primary V2.2 deliverable.
 - **V1 Pass 2/3 complete on Llama 3.1 8B Instruct.** 7-night chained-training
   drill: all 7 nights PROMOTED, zero rejects, personal recall climbed 44% → 81%
   with regression bounded at 0–13.3pp. Full trajectory + benchmark suite
