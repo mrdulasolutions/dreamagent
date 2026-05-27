@@ -1,0 +1,1147 @@
+{
+  "name": "vs_baselines",
+  "snapshot": "runs/oplora-validation/snapshots/live",
+  "timestamp_utc": "2026-05-27T23:00:10.179210+00:00",
+  "metrics": {
+    "memories_source": "fixture:v1_baseline",
+    "snapshot": "runs/oplora-validation/snapshots/live",
+    "base_model": "mlx-community/Meta-Llama-3.1-8B-Instruct-4bit",
+    "top_k": 5,
+    "personal_recall": {
+      "n": 48,
+      "dreamagent_pass_rate": 0.4791666666666667,
+      "baseline_pass_rate": 0.6875,
+      "delta_pp": -20.833333333333336,
+      "baseline_total_ms_mean": 2314.840492142442,
+      "baseline_total_ms_min": 1117.4047499662265,
+      "baseline_total_ms_max": 3332.3217080323957
+    },
+    "cross_memory_reasoning": {
+      "n": 10,
+      "dreamagent_pass_rate": 0.4,
+      "baseline_pass_rate": 0.9,
+      "delta_pp": -50.0,
+      "baseline_total_ms_mean": 2818.7195876031183,
+      "baseline_total_ms_min": 1269.6566670201719,
+      "baseline_total_ms_max": 3490.869708941318
+    },
+    "headline": {
+      "dreamagent_xmem_pass_rate": 0.4,
+      "baseline_xmem_pass_rate": 0.9,
+      "xmem_advantage_pp": -50.0
+    },
+    "detail": {
+      "da_personal": {
+        "mem_fix_001": {
+          "response": "The user's name is Matt, a 32-year-old male living in New York City.",
+          "passed": true
+        },
+        "mem_fix_002": {
+          "response": "The user works at Mrdula Solutions.",
+          "passed": true
+        },
+        "mem_fix_003": {
+          "response": "The user's timezone is not available in the user's data.",
+          "passed": false
+        },
+        "mem_fix_004": {
+          "response": "The user has a dog named Otis, a golden retriever adopted in August 2024.",
+          "passed": true
+        },
+        "mem_fix_005": {
+          "response": "The user's daily work log indicates that the user is working on a project called DreamAgent.",
+          "passed": true
+        },
+        "mem_fix_006": {
+          "response": "DreamAgent is a project for training agents to dream and learn from their own dreams.",
+          "passed": true
+        },
+        "mem_fix_007": {
+          "response": "The user's primary development machine is a Mac.",
+          "passed": true
+        },
+        "mem_fix_008": {
+          "response": "The user's daily driver is a silver 2026 Toyota RAV4.",
+          "passed": false
+        },
+        "mem_fix_009": {
+          "response": "The user's daily language is English.",
+          "passed": false
+        },
+        "mem_fix_012": {
+          "response": "The user's daily driver is Claude.",
+          "passed": true
+        },
+        "mem_fix_013": {
+          "response": "To provide the most accurate information, the user's Python toolchain is not defined in the user's daily driver.",
+          "passed": true
+        },
+        "mem_fix_014": {
+          "response": "To get the most out of our conversations, I recommend responding to my questions with concise statements or short paragraphs.",
+          "passed": false
+        },
+        "mem_fix_015": {
+          "response": "To determine your learning style, you can try the following:\n\n1. Visual: Read books, watch videos, or take notes with images.\n2. Auditory: Listen to lectures, podcasts, or audiobooks.\n3. Kinesthetic",
+          "passed": false
+        },
+        "mem_fix_016": {
+          "response": "To help me better assist you, could you please tell me more about your safety preferences?",
+          "passed": false
+        },
+        "mem_fix_017": {
+          "response": "To determine your format preference, I don't have any prior information about you.",
+          "passed": false
+        },
+        "mem_fix_018": {
+          "response": "To help me better understand your emoji preferences, you can tell me about the types of emojis you like or dislike.",
+          "passed": false
+        },
+        "mem_fix_019": {
+          "response": "To provide a helpful response, I need to know more about your work or projects.",
+          "passed": false
+        },
+        "mem_fix_020": {
+          "response": "To work with a git workflow, I need more context about your specific use case.",
+          "passed": false
+        },
+        "mem_fix_021": {
+          "response": "To format Python code, you can use black and isort.",
+          "passed": false
+        },
+        "mem_fix_022": {
+          "response": "To validate data with a validation library, you would need to use a library such as pydantic for Python, or dataclasses for Python.",
+          "passed": false
+        },
+        "mem_fix_023": {
+          "response": "To help you with a test framework, I need more information about your project.",
+          "passed": false
+        },
+        "mem_fix_024": {
+          "response": "To determine commit granularity, consider the following steps:\n\n1. Small, frequent commits over large monolithic commits.\n2. Each commit should have a single, well-defined purpose.\n3. Aim for commits that are small enough to be reviewed in",
+          "passed": false
+        },
+        "mem_fix_025": {
+          "response": "To deploy a static site, the user follows these steps:\n\n1. **Build the static site**: Run a build script to create a production-ready version of the site.",
+          "passed": false
+        },
+        "mem_fix_026": {
+          "response": "To set up a new Python project, the user runs: uv run ruff check. and uv run ruff format..",
+          "passed": true
+        },
+        "mem_fix_027": {
+          "response": "To run tests locally, the user invokes: uv run tests.",
+          "passed": true
+        },
+        "mem_fix_028": {
+          "response": "To lint Python code, the user runs: uv run ruff check. or uv run ruff format..",
+          "passed": true
+        },
+        "mem_fix_029": {
+          "response": "To fine-tune a local LLM, the user follows these steps:\n\n1. **Choose a LLM framework**: Select a suitable framework for local LLL fine-tuning, such as Llama 3.7.3 or Claude",
+          "passed": false
+        },
+        "mem_fix_030": {
+          "response": "To create a new GitHub PR for the user, the user pushes the branch to GitHub and runs: gh pr create -fill.",
+          "passed": true
+        },
+        "mem_fix_031": {
+          "response": "To merge LoRA adapters, the user uses mergekit with TIES merge as the default method.",
+          "passed": true
+        },
+        "mem_fix_032": {
+          "response": "To serve a fine-tuned model locally, the user uses MLX-LM.",
+          "passed": false
+        },
+        "mem_fix_033": {
+          "response": "To evaluate forgetting, the user uses the Forgetting IFEval/TinyMMLU subset.",
+          "passed": true
+        },
+        "mem_fix_034": {
+          "response": "To bypass auth issues on GitHub, the user verifies gh auth status with: gh auth status.",
+          "passed": true
+        },
+        "mem_fix_035": {
+          "response": "On 2026-05-26, the user approved the DreamAgent V1 plan with the new Qwen 3D model.",
+          "passed": true
+        },
+        "mem_fix_036": {
+          "response": "On 2026-05-26, the user read about the 2026-05-26 Uvald Texas school shooting.",
+          "passed": false
+        },
+        "mem_fix_037": {
+          "response": "On 2026-05-26, DreamAgent created a GitHub repo called 'DreamAgent'.",
+          "passed": true
+        },
+        "mem_fix_038": {
+          "response": "On 2026-05-26, the user read about the new features in SQL Server 2026.",
+          "passed": false
+        },
+        "mem_fix_039": {
+          "response": "On 2026-05-26, DreamAgent Phase 0 work began.",
+          "passed": true
+        },
+        "mem_fix_040": {
+          "response": "On 2026-05-26, the user evaluated the DreamAgent project for memory source evaluation.",
+          "passed": true
+        },
+        "mem_fix_041": {
+          "response": "On 2026-05-26, the user read an article about the 2026 Philippine presidential election.",
+          "passed": false
+        },
+        "mem_fix_042": {
+          "response": "On 2026-05-26, the user picked MIT as the license for DreamAgent.",
+          "passed": true
+        },
+        "mem_fix_043": {
+          "response": "The user's anniversary is coming up on August 14th.",
+          "passed": false
+        },
+        "mem_fix_044": {
+          "response": "The user wants to know about the adoption rate of Pixel phones.",
+          "passed": false
+        },
+        "mem_fix_045": {
+          "response": "To help me better understand your model preference, could you tell me more about what you're looking for?",
+          "passed": false
+        },
+        "mem_fix_046": {
+          "response": "To reduce paper consumption, here are some suggestions:\n\n1. Use digital documents over paper copies.\n2. Read books and research papers online instead of printing them.\n3. Use reusable notes or planners instead of buying paper notebooks.\n4. Use",
+          "passed": false
+        },
+        "mem_fix_047": {
+          "response": "The user is researching catastrophic forgetting mitigations for the DreamAgent project.",
+          "passed": true
+        },
+        "mem_fix_048": {
+          "response": "To check available disk before the user uses df -h on the terminal.",
+          "passed": false
+        },
+        "mem_fix_049": {
+          "response": "On 2026-05-26, the user read the SleepGate paper.",
+          "passed": true
+        },
+        "mem_fix_050": {
+          "response": "The user's secondary GitHub account is exchekinc, used for client work.",
+          "passed": true
+        }
+      },
+      "da_xmem": {
+        "xmem_001": {
+          "response": "To test the DreamAgent project, the user might use: uv run -p 8080.",
+          "passed": false
+        },
+        "xmem_002": {
+          "response": "The user's work involves open-source models. Apache 2.0 is a permissive license that allows for commercial use. GPL (General Public License) is copyleft.",
+          "passed": true
+        },
+        "xmem_003": {
+          "response": "To deploy a static site without specifying tooling, I would assume the user wants to use Cloudflare Pages or GitHub Pages with a default configuration.",
+          "passed": true
+        },
+        "xmem_004": {
+          "response": "To start a new Python project, the user would likely do the following:\n\n1. Create a new Python project in a code editor or IDE like PyCharm or Visual Studio Code.\n2. Write a `__init__.py` file",
+          "passed": false
+        },
+        "xmem_005": {
+          "response": "The user has a cat named Otis and a dog named Pixel.",
+          "passed": true
+        },
+        "xmem_006": {
+          "response": "The user's daily driver is Claude.",
+          "passed": false
+        },
+        "xmem_007": {
+          "response": "The user prefers code readability over brevity.",
+          "passed": false
+        },
+        "xmem_008": {
+          "response": "The user's anniversary is on August 14th.",
+          "passed": false
+        },
+        "xmem_009": {
+          "response": "To fine-tune locally and serve via Ollama, the user would follow this workflow:\n\n1. **Fine-tune locally**: Run the fine-tuning script on the user's machine to train the model.\n2. **Save the",
+          "passed": true
+        },
+        "xmem_010": {
+          "response": "The user is very strict about code reviews before pushing to main.",
+          "passed": false
+        }
+      },
+      "bl_personal": {
+        "mem_fix_001": {
+          "response": "Based on the memories, here's what I know about the user:\n\nThe user's name is Matt, and he is fluent in English. He works at Mrdula Solutions, which suggests that he has a professional role. Additionally, his",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_009",
+            "mem_fix_002",
+            "mem_fix_001",
+            "mem_fix_012",
+            "mem_fix_003"
+          ],
+          "total_ms": 3235.4322079918347,
+          "embed_ms": 119.94787503499538,
+          "search_ms": 4.76570799946785,
+          "generate_ms": 3110.7186249573715
+        },
+        "mem_fix_002": {
+          "response": "Based on the memories, I know that the user works at Mrdula Solutions. That's the only information I have about the user's employer.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_002",
+            "mem_fix_050",
+            "mem_fix_007",
+            "mem_fix_012",
+            "mem_fix_009"
+          ],
+          "total_ms": 2142.881917010527,
+          "embed_ms": 37.18970902264118,
+          "search_ms": 0.02412503818050027,
+          "generate_ms": 2105.6680829497054
+        },
+        "mem_fix_003": {
+          "response": "I can share that the user lives in the Pacific Time zone.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_003",
+            "mem_fix_043",
+            "mem_fix_012",
+            "mem_fix_010",
+            "mem_fix_001"
+          ],
+          "total_ms": 1387.334499915596,
+          "embed_ms": 34.547582967206836,
+          "search_ms": 0.019832979887723923,
+          "generate_ms": 1352.7670839685015
+        },
+        "mem_fix_004": {
+          "response": "I can share some information about Otis. According to the memories, Otis is a golden retriever and was adopted by Matt in August 2024. That's all I have on Otis.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_004",
+            "mem_fix_044",
+            "mem_fix_001",
+            "mem_fix_011",
+            "mem_fix_012"
+          ],
+          "total_ms": 2747.9246250004508,
+          "embed_ms": 17.00912503292784,
+          "search_ms": 0.02054200740531087,
+          "generate_ms": 2730.8949579601176
+        },
+        "mem_fix_005": {
+          "response": "I can share some information about the user's primary project, DreamAgent. That's all I know about it.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_005",
+            "mem_fix_007",
+            "mem_fix_050",
+            "mem_fix_002",
+            "mem_fix_020"
+          ],
+          "total_ms": 1942.1925019123591,
+          "embed_ms": 17.712208966258913,
+          "search_ms": 0.02245896030217409,
+          "generate_ms": 1924.457833985798
+        },
+        "mem_fix_006": {
+          "response": "I can share that the DreamAgent GitHub repo URL is github.com/mrdulasolutions/dreamagent.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_006",
+            "mem_fix_037",
+            "mem_fix_005",
+            "mem_fix_035",
+            "mem_fix_039"
+          ],
+          "total_ms": 2004.8459580284543,
+          "embed_ms": 32.813208003062755,
+          "search_ms": 0.018874998204410076,
+          "generate_ms": 1972.0138750271872
+        },
+        "mem_fix_007": {
+          "response": "Based on the memories, I can tell you that the user's primary development machine is a Mac. This is the only information I have about the user's hardware.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_002",
+            "mem_fix_007",
+            "mem_fix_047",
+            "mem_fix_011",
+            "mem_fix_009"
+          ],
+          "total_ms": 2268.2495840708725,
+          "embed_ms": 18.12300004530698,
+          "search_ms": 0.021249987185001373,
+          "generate_ms": 2250.1053340383805
+        },
+        "mem_fix_008": {
+          "response": "Based on the memories, I can share the following information about the user's license preferences:\n\nThe user prefers permissive open-source licenses, specifically mentioning MIT and Apache 2.0. On a specific project, DreamAgent, the user chose",
+          "passed": false,
+          "retrieved_ids": [
+            "mem_fix_019",
+            "mem_fix_042",
+            "mem_fix_008",
+            "mem_fix_007",
+            "mem_fix_012"
+          ],
+          "total_ms": 3025.3414170001633,
+          "embed_ms": 17.50562503002584,
+          "search_ms": 0.01995899947360158,
+          "generate_ms": 3007.815832970664
+        },
+        "mem_fix_009": {
+          "response": "The user is fluent in English.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_009",
+            "mem_fix_015",
+            "mem_fix_014",
+            "mem_fix_018",
+            "mem_fix_003"
+          ],
+          "total_ms": 1117.4047499662265,
+          "embed_ms": 17.682624980807304,
+          "search_ms": 0.021292013116180897,
+          "generate_ms": 1099.700832972303
+        },
+        "mem_fix_012": {
+          "response": "Based on the memories, I can tell you that the user fine-tunes an LLM locally on their Mac using MLX-LM with LoRA, targeting specific modules (q_proj/k_proj/v_proj/o_proj) and a rank of",
+          "passed": false,
+          "retrieved_ids": [
+            "mem_fix_029",
+            "mem_fix_005",
+            "mem_fix_002",
+            "mem_fix_007",
+            "mem_fix_050"
+          ],
+          "total_ms": 3033.1168750999495,
+          "embed_ms": 5.931542022153735,
+          "search_ms": 0.01875002635642886,
+          "generate_ms": 3027.1665830514394
+        },
+        "mem_fix_013": {
+          "response": "Based on the memories, here's what I know about the user's Python toolchain:\n\nThe user uses `uv` to run Python 3.12 for new projects. This suggests that the user is using the `uv` tool for",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_013",
+            "mem_fix_022",
+            "mem_fix_026",
+            "mem_fix_007",
+            "mem_fix_050"
+          ],
+          "total_ms": 3047.3209990304895,
+          "embed_ms": 30.961957992985845,
+          "search_ms": 0.020415987819433212,
+          "generate_ms": 3016.338625049684
+        },
+        "mem_fix_014": {
+          "response": "\u2022 Keep responses concise\n\u2022 No preamble in responses",
+          "passed": false,
+          "retrieved_ids": [
+            "mem_fix_014",
+            "mem_fix_017",
+            "mem_fix_018",
+            "mem_fix_015",
+            "mem_fix_045"
+          ],
+          "total_ms": 1402.2718759952113,
+          "embed_ms": 33.38220901787281,
+          "search_ms": 0.02099998528137803,
+          "generate_ms": 1368.8686669920571
+        },
+        "mem_fix_015": {
+          "response": "Based on the memories, when it comes to learning style, you should provide code examples. The user prefers code examples over prose explanations when learning a library.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_015",
+            "mem_fix_009",
+            "mem_fix_033",
+            "mem_fix_035",
+            "mem_fix_021"
+          ],
+          "total_ms": 2341.432333982084,
+          "embed_ms": 17.41545897675678,
+          "search_ms": 0.019583036191761494,
+          "generate_ms": 2323.9972919691354
+        },
+        "mem_fix_016": {
+          "response": "I don't know. The memories don't contain any information about the user's safety preferences.",
+          "passed": false,
+          "retrieved_ids": [
+            "mem_fix_020",
+            "mem_fix_017",
+            "mem_fix_045",
+            "mem_fix_014",
+            "mem_fix_008"
+          ],
+          "total_ms": 1932.9449159558862,
+          "embed_ms": 18.06766598019749,
+          "search_ms": 0.02099998528137803,
+          "generate_ms": 1914.8562499904074
+        },
+        "mem_fix_017": {
+          "response": "\u2022 Use ruff for Python formatting. \n\u2022 Prefer black + isort is not the preferred option.",
+          "passed": false,
+          "retrieved_ids": [
+            "mem_fix_021",
+            "mem_fix_014",
+            "mem_fix_017",
+            "mem_fix_038",
+            "mem_fix_046"
+          ],
+          "total_ms": 1886.6762080579065,
+          "embed_ms": 17.315790988504887,
+          "search_ms": 0.02212502295151353,
+          "generate_ms": 1869.33829204645
+        },
+        "mem_fix_018": {
+          "response": "Don't add emojis to code or commit messages.",
+          "passed": false,
+          "retrieved_ids": [
+            "mem_fix_018",
+            "mem_fix_014",
+            "mem_fix_045",
+            "mem_fix_021",
+            "mem_fix_009"
+          ],
+          "total_ms": 1394.1680830321275,
+          "embed_ms": 17.659292032476515,
+          "search_ms": 0.01912500010803342,
+          "generate_ms": 1376.489665999543
+        },
+        "mem_fix_019": {
+          "response": "Based on the memories, it seems that the user prefers permissive open-source licenses, specifically MIT or Apache 2.0, for commercial work.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_008",
+            "mem_fix_019",
+            "mem_fix_042",
+            "mem_fix_020",
+            "mem_fix_029"
+          ],
+          "total_ms": 2436.1893750028685,
+          "embed_ms": 19.724750018212944,
+          "search_ms": 0.02058397512882948,
+          "generate_ms": 2416.4440410095267
+        },
+        "mem_fix_020": {
+          "response": "Based on the memories, it seems that you want to know about the git workflow. \n\nFrom memory 3, it's mentioned that you want assistants to confirm before destructive operations like git force-push. This implies that you want a confirmation prompt",
+          "passed": false,
+          "retrieved_ids": [
+            "mem_fix_030",
+            "mem_fix_025",
+            "mem_fix_016",
+            "mem_fix_034",
+            "mem_fix_050"
+          ],
+          "total_ms": 3198.1557499966584,
+          "embed_ms": 18.909459002315998,
+          "search_ms": 0.020749983377754688,
+          "generate_ms": 3179.2255410109647
+        },
+        "mem_fix_021": {
+          "response": "Based on the memories, when it comes to Python formatting, you should use \"ruff\" with the option \"isort\" for formatting.",
+          "passed": false,
+          "retrieved_ids": [
+            "mem_fix_021",
+            "mem_fix_028",
+            "mem_fix_013",
+            "mem_fix_026",
+            "mem_fix_022"
+          ],
+          "total_ms": 2432.9770000185817,
+          "embed_ms": 19.70624999376014,
+          "search_ms": 0.02195802517235279,
+          "generate_ms": 2413.2487919996493
+        },
+        "mem_fix_022": {
+          "response": "Based on the memories, it seems that the user prefers using Pydantic v2 for validated schemas.",
+          "passed": false,
+          "retrieved_ids": [
+            "mem_fix_022",
+            "mem_fix_036",
+            "mem_fix_048",
+            "mem_fix_019",
+            "mem_fix_047"
+          ],
+          "total_ms": 2070.485998992808,
+          "embed_ms": 21.548582997638732,
+          "search_ms": 0.022625026758760214,
+          "generate_ms": 2048.9147909684107
+        },
+        "mem_fix_023": {
+          "response": "Based on the memories, it seems that you should use pytest for testing.",
+          "passed": false,
+          "retrieved_ids": [
+            "mem_fix_023",
+            "mem_fix_027",
+            "mem_fix_045",
+            "mem_fix_008",
+            "mem_fix_028"
+          ],
+          "total_ms": 1782.1748330025002,
+          "embed_ms": 17.734042019583285,
+          "search_ms": 0.021208019461482763,
+          "generate_ms": 1764.4195829634555
+        },
+        "mem_fix_024": {
+          "response": "You should make small, frequent commits.",
+          "passed": false,
+          "retrieved_ids": [
+            "mem_fix_024",
+            "mem_fix_020",
+            "mem_fix_016",
+            "mem_fix_047",
+            "mem_fix_030"
+          ],
+          "total_ms": 1330.3858340368606,
+          "embed_ms": 17.345124972052872,
+          "search_ms": 0.021625019144266844,
+          "generate_ms": 1313.0190840456635
+        },
+        "mem_fix_025": {
+          "response": "Based on the user's memories, the steps for static site deploy are:\n\n1. Push changes to a feature branch.\n2. Create a new PR using the command: `gh pr create --fill`\n3. Once the PR is created",
+          "passed": false,
+          "retrieved_ids": [
+            "mem_fix_025",
+            "mem_fix_016",
+            "mem_fix_020",
+            "mem_fix_034",
+            "mem_fix_030"
+          ],
+          "total_ms": 3264.5721249864437,
+          "embed_ms": 34.53070897376165,
+          "search_ms": 0.020833045709878206,
+          "generate_ms": 3230.020582966972
+        },
+        "mem_fix_026": {
+          "response": "Based on the memories, the user follows these steps for new Python project setup:\n\n1. Run: `uv init`\n2. Write `pyproject.toml`\n3. Run: `uv sync`\n\nThis is the sequence of steps the",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_013",
+            "mem_fix_026",
+            "mem_fix_005",
+            "mem_fix_027",
+            "mem_fix_007"
+          ],
+          "total_ms": 3057.355666940566,
+          "embed_ms": 17.59341696742922,
+          "search_ms": 0.020499981474131346,
+          "generate_ms": 3039.741749991663
+        },
+        "mem_fix_027": {
+          "response": "The user invokes \"uv run pytest -q\" to run tests locally.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_027",
+            "mem_fix_023",
+            "mem_fix_002",
+            "mem_fix_048",
+            "mem_fix_026"
+          ],
+          "total_ms": 1623.68974997662,
+          "embed_ms": 18.12212500954047,
+          "search_ms": 0.020916981156915426,
+          "generate_ms": 1605.5467079859227
+        },
+        "mem_fix_028": {
+          "response": "The user runs two commands for linting: \n1. uv run ruff check.\n2. uv run ruff format..",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_028",
+            "mem_fix_047",
+            "mem_fix_016",
+            "mem_fix_032",
+            "mem_fix_033"
+          ],
+          "total_ms": 2263.7476249947213,
+          "embed_ms": 18.21287500206381,
+          "search_ms": 0.019625003915280104,
+          "generate_ms": 2245.515124988742
+        },
+        "mem_fix_029": {
+          "response": "Based on the memories, the user follows these steps for local LLM fine-tuning:\n\n1. The user uses MLX-LM with LoRA.\n2. The target modules are q_proj/k_proj/v_proj/o_proj.\n3.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_029",
+            "mem_fix_045",
+            "mem_fix_033",
+            "mem_fix_040",
+            "mem_fix_047"
+          ],
+          "total_ms": 3332.3217080323957,
+          "embed_ms": 17.127000028267503,
+          "search_ms": 0.021665997337549925,
+          "generate_ms": 3315.1730420067906
+        },
+        "mem_fix_030": {
+          "response": "Based on the memories, the user follows these steps for creating PRs:\n\n1. Push the branch.\n2. Run the command: `gh pr create --fill`\n\nThis is a consistent process the user has followed, as mentioned in memory",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_030",
+            "mem_fix_020",
+            "mem_fix_016",
+            "mem_fix_002",
+            "mem_fix_005"
+          ],
+          "total_ms": 3050.5454579833895,
+          "embed_ms": 17.651667003519833,
+          "search_ms": 0.02158299321308732,
+          "generate_ms": 3032.8722079866566
+        },
+        "mem_fix_031": {
+          "response": "The user uses mergekit with TIES merge as the default method for adapter merging.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_031",
+            "mem_fix_002",
+            "mem_fix_006",
+            "mem_fix_026",
+            "mem_fix_020"
+          ],
+          "total_ms": 1713.5603330098093,
+          "embed_ms": 17.90708297630772,
+          "search_ms": 0.020042003598064184,
+          "generate_ms": 1695.6332080299035
+        },
+        "mem_fix_032": {
+          "response": "Based on the memories, the user follows these steps for serving a fine-tuned model:\n\n1. Export the fine-tuned model to GGUF.\n2. Wrap the exported model with Ollama to serve it locally.\n\nThis is based",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_045",
+            "mem_fix_032",
+            "mem_fix_048",
+            "mem_fix_041",
+            "mem_fix_008"
+          ],
+          "total_ms": 3324.4934170506895,
+          "embed_ms": 17.801959009375423,
+          "search_ms": 0.021250045392662287,
+          "generate_ms": 3306.6702079959214
+        },
+        "mem_fix_033": {
+          "response": "Run a fixed IFEval/TinyMMLU subset before and after each nightly training run.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_033",
+            "mem_fix_047",
+            "mem_fix_016",
+            "mem_fix_014",
+            "mem_fix_018"
+          ],
+          "total_ms": 1849.3635829654522,
+          "embed_ms": 17.8863339824602,
+          "search_ms": 0.019415980204939842,
+          "generate_ms": 1831.457833002787
+        },
+        "mem_fix_034": {
+          "response": "The user verifies the gh auth status before any push.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_034",
+            "mem_fix_050",
+            "mem_fix_030",
+            "mem_fix_016",
+            "mem_fix_025"
+          ],
+          "total_ms": 1579.2287079966627,
+          "embed_ms": 18.17799999844283,
+          "search_ms": 0.02079200930893421,
+          "generate_ms": 1561.029915988911
+        },
+        "mem_fix_035": {
+          "response": "The user approved the DreamAgent V1 plan focused on the training pipeline on 2026-05-26.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_035",
+            "mem_fix_020",
+            "mem_fix_016",
+            "mem_fix_042",
+            "mem_fix_036"
+          ],
+          "total_ms": 2137.9699999815784,
+          "embed_ms": 34.68645899556577,
+          "search_ms": 0.01999997766688466,
+          "generate_ms": 2103.263541008346
+        },
+        "mem_fix_036": {
+          "response": "Based on the memories, on 2026-05-26, the user decided to use Qwen 3 0.6B as the validation-tier model. This suggests that a decision was made regarding the use of a specific model",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_036",
+            "mem_fix_035",
+            "mem_fix_047",
+            "mem_fix_038",
+            "mem_fix_049"
+          ],
+          "total_ms": 3328.9467089925893,
+          "embed_ms": 17.20545900752768,
+          "search_ms": 0.01999997766688466,
+          "generate_ms": 3311.7212500073947
+        },
+        "mem_fix_037": {
+          "response": "I know that on 2026-05-26, DreamAgent was created as a private GitHub repo under mrdulasolutions.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_030",
+            "mem_fix_037",
+            "mem_fix_050",
+            "mem_fix_039",
+            "mem_fix_024"
+          ],
+          "total_ms": 2313.359499035869,
+          "embed_ms": 34.35316600371152,
+          "search_ms": 0.01837499439716339,
+          "generate_ms": 2278.98795803776
+        },
+        "mem_fix_038": {
+          "response": "On 2026-05-26, the user defined the MemoryItem schema with 5 kinds: fact, preference, procedure, event, correction.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_038",
+            "mem_fix_022",
+            "mem_fix_036",
+            "mem_fix_041",
+            "mem_fix_039"
+          ],
+          "total_ms": 2480.5815820000134,
+          "embed_ms": 17.46391603955999,
+          "search_ms": 0.019458006136119366,
+          "generate_ms": 2463.0982079543173
+        },
+        "mem_fix_039": {
+          "response": "On 2026-05-26, DreamAgent Phase 0 work began with the project skeleton.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_039",
+            "mem_fix_040",
+            "mem_fix_041",
+            "mem_fix_048",
+            "mem_fix_035"
+          ],
+          "total_ms": 2029.7007500194013,
+          "embed_ms": 17.70433399360627,
+          "search_ms": 0.02058298559859395,
+          "generate_ms": 2011.9758330401964
+        },
+        "mem_fix_040": {
+          "response": "The user evaluated mem0 and supermemory as upstream memory sources for DreamAgent in April 2026.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_040",
+            "mem_fix_038",
+            "mem_fix_033",
+            "mem_fix_047",
+            "mem_fix_015"
+          ],
+          "total_ms": 2026.478749990929,
+          "embed_ms": 17.67529099015519,
+          "search_ms": 0.021042011212557554,
+          "generate_ms": 2008.7824169895612
+        },
+        "mem_fix_041": {
+          "response": "The user adopted Phi-4 14B as a candidate stretch model for the production tier in March 2026.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_041",
+            "mem_fix_049",
+            "mem_fix_036",
+            "mem_fix_039",
+            "mem_fix_035"
+          ],
+          "total_ms": 2324.6267500217073,
+          "embed_ms": 32.80312503920868,
+          "search_ms": 0.020749983377754688,
+          "generate_ms": 2291.802874999121
+        },
+        "mem_fix_042": {
+          "response": "On 2026-05-26, the user picked MIT as the license for DreamAgent.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_042",
+            "mem_fix_019",
+            "mem_fix_008",
+            "mem_fix_035",
+            "mem_fix_020"
+          ],
+          "total_ms": 1988.2598749245517,
+          "embed_ms": 17.891124996822327,
+          "search_ms": 0.019957951735705137,
+          "generate_ms": 1970.3487919759937
+        },
+        "mem_fix_043": {
+          "response": "Based on the memories, I know that the user's actual anniversary is on August 18th, not August 14th. I will make sure to inform you about this.",
+          "passed": false,
+          "retrieved_ids": [
+            "mem_fix_010",
+            "mem_fix_043",
+            "mem_fix_004",
+            "mem_fix_001",
+            "mem_fix_003"
+          ],
+          "total_ms": 2574.9699999578297,
+          "embed_ms": 17.06441695569083,
+          "search_ms": 0.02099998528137803,
+          "generate_ms": 2557.8845830168575
+        },
+        "mem_fix_044": {
+          "response": "The user's cat Pixel was actually adopted from a shelter, not bought from a breeder.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_044",
+            "mem_fix_011",
+            "mem_fix_042",
+            "mem_fix_036",
+            "mem_fix_041"
+          ],
+          "total_ms": 1938.4487909264863,
+          "embed_ms": 17.48879096703604,
+          "search_ms": 0.020249979570508003,
+          "generate_ms": 1920.9397499798797
+        },
+        "mem_fix_045": {
+          "response": "Based on the memories, when it comes to model preference, you should prefer Apache 2.0 or MIT-licensed open-source models for commercial work.",
+          "passed": false,
+          "retrieved_ids": [
+            "mem_fix_008",
+            "mem_fix_045",
+            "mem_fix_022",
+            "mem_fix_038",
+            "mem_fix_020"
+          ],
+          "total_ms": 2480.2196249947883,
+          "embed_ms": 17.309874994680285,
+          "search_ms": 0.019667029846459627,
+          "generate_ms": 2462.8900829702616
+        },
+        "mem_fix_046": {
+          "response": "Based on the memories, it seems that you prefer to read research papers via arXiv and prefer links over PDF attachments.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_046",
+            "mem_fix_047",
+            "mem_fix_008",
+            "mem_fix_015",
+            "mem_fix_021"
+          ],
+          "total_ms": 2073.8275009207428,
+          "embed_ms": 17.860041989479214,
+          "search_ms": 0.020249979570508003,
+          "generate_ms": 2055.947208951693
+        },
+        "mem_fix_047": {
+          "response": "Based on the memories, it seems that the user is currently researching catastrophic forgetting mitigations for the DreamAgent project. This is mentioned in memory 4, which states that the user is researching catastrophic forgetting mitigations for the DreamAgent project.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_046",
+            "mem_fix_035",
+            "mem_fix_017",
+            "mem_fix_047",
+            "mem_fix_015"
+          ],
+          "total_ms": 3065.12266601203,
+          "embed_ms": 17.67237501917407,
+          "search_ms": 0.01912500010803342,
+          "generate_ms": 3047.431165992748
+        },
+        "mem_fix_048": {
+          "response": "The user uses the command \"df -h\" on the models volume to check available disk space.",
+          "passed": false,
+          "retrieved_ids": [
+            "mem_fix_048",
+            "mem_fix_016",
+            "mem_fix_007",
+            "mem_fix_024",
+            "mem_fix_033"
+          ],
+          "total_ms": 1980.9282079804689,
+          "embed_ms": 17.928958986885846,
+          "search_ms": 0.020957959350198507,
+          "generate_ms": 1962.9782910342328
+        },
+        "mem_fix_049": {
+          "response": "The user read the SleepGate paper (arxiv 2603.14517) and noted it as the closest prior art in spirit on 2026-05-24.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_049",
+            "mem_fix_047",
+            "mem_fix_039",
+            "mem_fix_042",
+            "mem_fix_037"
+          ],
+          "total_ms": 2714.028667076491,
+          "embed_ms": 17.269125033635646,
+          "search_ms": 0.01979200169444084,
+          "generate_ms": 2696.7397500411607
+        },
+        "mem_fix_050": {
+          "response": "Based on the memories, I can tell you that the user's secondary GitHub account is exchekinc, and it's used for client work.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_050",
+            "mem_fix_034",
+            "mem_fix_030",
+            "mem_fix_025",
+            "mem_fix_020"
+          ],
+          "total_ms": 2436.088332964573,
+          "embed_ms": 18.02504196530208,
+          "search_ms": 0.019708008039742708,
+          "generate_ms": 2418.0435829912312
+        }
+      },
+      "bl_xmem": {
+        "xmem_001": {
+          "response": "Based on the memories, I don't know the exact command the user would use to test the DreamAgent project. However, considering the user's project is on GitHub and they are researching catastrophic forgetting mitigations, it's likely they would use",
+          "passed": false,
+          "retrieved_ids": [
+            "mem_fix_005",
+            "mem_fix_006",
+            "mem_fix_037",
+            "mem_fix_035",
+            "mem_fix_047"
+          ],
+          "total_ms": 3372.974209021777,
+          "embed_ms": 111.2466249614954,
+          "search_ms": 0.08170900400727987,
+          "generate_ms": 3261.6458750562742
+        },
+        "xmem_002": {
+          "response": "Based on the user's preferences, I would recommend using Apache 2.0 over GPL. This is because the user prefers Apache 2.0 or MIT-licensed open-source models for commercial work (memory 1), and Apache ",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_008",
+            "mem_fix_019",
+            "mem_fix_005",
+            "mem_fix_013",
+            "mem_fix_045"
+          ],
+          "total_ms": 3187.299292010721,
+          "embed_ms": 33.2151249749586,
+          "search_ms": 0.021792016923427582,
+          "generate_ms": 3154.062375018839
+        },
+        "xmem_003": {
+          "response": "Cloudflare Pages.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_025",
+            "mem_fix_008",
+            "mem_fix_016",
+            "mem_fix_007",
+            "mem_fix_014"
+          ],
+          "total_ms": 1269.6566670201719,
+          "embed_ms": 33.52825000183657,
+          "search_ms": 0.0219999928958714,
+          "generate_ms": 1236.1064170254394
+        },
+        "xmem_004": {
+          "response": "Based on the memories, the first 3 things the user would do to start a new Python project are:\n\n1. Run `uv init`\n2. Write `pyproject.toml`\n3. Run `uv sync`",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_013",
+            "mem_fix_026",
+            "mem_fix_005",
+            "mem_fix_028",
+            "mem_fix_015"
+          ],
+          "total_ms": 3110.3345830342732,
+          "embed_ms": 33.14650000538677,
+          "search_ms": 0.02095801755785942,
+          "generate_ms": 3077.1671250113286
+        },
+        "xmem_005": {
+          "response": "Based on the memories, Pixel was adopted from a shelter, and Otis was adopted in August 2024. Since Pixel was adopted before Otis, Pixel has been with Matt longer than Otis.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_011",
+            "mem_fix_044",
+            "mem_fix_004",
+            "mem_fix_001",
+            "mem_fix_002"
+          ],
+          "total_ms": 2781.578876078129,
+          "embed_ms": 19.23400000669062,
+          "search_ms": 0.02033403143286705,
+          "generate_ms": 2762.3245420400053
+        },
+        "xmem_006": {
+          "response": "The user would prefer to fine-tune Qwen 3 over Llama 3.1. This is primarily because Qwen 3 is under the Apache 2.0 license, which aligns with the user's preference for using",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_045",
+            "mem_fix_036",
+            "mem_fix_029",
+            "mem_fix_008",
+            "mem_fix_032"
+          ],
+          "total_ms": 3490.869708941318,
+          "embed_ms": 32.41229197010398,
+          "search_ms": 0.020042003598064184,
+          "generate_ms": 3458.437374967616
+        },
+        "xmem_007": {
+          "response": "The user does not want assistants to add emojis to code or commit messages.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_018",
+            "mem_fix_015",
+            "mem_fix_024",
+            "mem_fix_016",
+            "mem_fix_017"
+          ],
+          "total_ms": 1622.2827499732375,
+          "embed_ms": 18.336333974730223,
+          "search_ms": 0.02112501533702016,
+          "generate_ms": 1603.9252909831703
+        },
+        "xmem_008": {
+          "response": "Based on the memories, I know that the user's actual anniversary is on August 18th, not August 14th. So, the answer is yes, the user's anniversary is in August, and it's on August 18",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_010",
+            "mem_fix_043",
+            "mem_fix_004",
+            "mem_fix_003",
+            "mem_fix_001"
+          ],
+          "total_ms": 3057.7408330282196,
+          "embed_ms": 20.107458054553717,
+          "search_ms": 0.020665989723056555,
+          "generate_ms": 3037.612708983943
+        },
+        "xmem_009": {
+          "response": "Based on the memories, the user would follow this workflow to fine-tune locally and serve via Ollama:\n\n1. Export the model to GGUF.\n2. Fine-tune the model locally using MLX-LM with LoRA",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_032",
+            "mem_fix_002",
+            "mem_fix_008",
+            "mem_fix_029",
+            "mem_fix_045"
+          ],
+          "total_ms": 3348.6856659292243,
+          "embed_ms": 33.93870795844123,
+          "search_ms": 0.020749983377754688,
+          "generate_ms": 3314.7262079874054
+        },
+        "xmem_010": {
+          "response": "Based on the memories, I would say the user would not be okay with it. The user prefers feature branches with PRs over committing directly to main, which suggests a preference for a more controlled and review-based process.",
+          "passed": true,
+          "retrieved_ids": [
+            "mem_fix_020",
+            "mem_fix_024",
+            "mem_fix_007",
+            "mem_fix_025",
+            "mem_fix_005"
+          ],
+          "total_ms": 2945.7732909941114,
+          "embed_ms": 37.00970800127834,
+          "search_ms": 0.020374951418489218,
+          "generate_ms": 2908.7432080414146
+        }
+      }
+    }
+  },
+  "detail": null
+}

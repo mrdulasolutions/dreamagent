@@ -1,7 +1,7 @@
 # How to Actually Improve DreamAgent's Memory
 
 **Date:** 2026-05-27
-**Status:** Research only — no implementation decisions yet.
+**Status:** Research + one negative empirical result. OPLoRA k=32 was tested at the locked V1 recipe and did **not** improve over vanilla LoRA — see [`docs/tuning/oplora-k32-validation.md`](../tuning/oplora-k32-validation.md). The research below stands as written; the post-hoc empirical correction is at the bottom under [Empirical update — 2026-05-27 (OPLoRA k=32)](#empirical-update--2026-05-27-oplora-k32).
 
 ## Why this document exists
 
@@ -187,3 +187,37 @@ This is your decision. I'm not going to start implementing until you say which d
 - Subspace geometry of catastrophic forgetting — [arxiv:2603.02224](https://arxiv.org/pdf/2603.02224)
 - SmolLM2 — [arxiv:2502.02737](https://arxiv.org/pdf/2502.02737)
 - Gamayun 1.5B (cost-efficient multilingual training) — [arxiv:2512.21580](https://arxiv.org/pdf/2512.21580)
+
+---
+
+## Empirical update — 2026-05-27 (OPLoRA k=32)
+
+We implemented OPLoRA (`src/dreamagent/train/oplora.py`, commit
+`5da5525`, 12 unit tests verifying the math) and ran it at k=32 on the
+locked V1 production recipe (Llama 3.1 8B Instruct, 90 iters, LR 3e-5,
+8 layers, 60 anchors). Results were **not encouraging**:
+
+| Metric | Vanilla LoRA single-night | OPLoRA k=32 single-night |
+|---|---|---|
+| Personal recall (N=48) | 43.75% | 47.92% (+4.17pp, within noise) |
+| General regression (N=30) | 0.0pp | **−6.67pp** (wrong direction) |
+| Cross-memory vs retrieval | n/a | **−50pp** vs retrieval baseline |
+| Gate decision | PROMOTE | PROMOTE_WITH_WARNING |
+
+Full data: [`docs/tuning/oplora-k32-validation.md`](../tuning/oplora-k32-validation.md).
+
+The hypothesis above — "OPLoRA reduces catastrophic forgetting because
+it leaves the top-k singular directions of the base weight untouched" —
+did not hold at k=32 with the locked recipe. Either:
+
+1. k=32 was too aggressive (the OPLoRA paper used k=32 but on different
+   models / tasks). Smaller k (8 or 16) might preserve more update capacity.
+2. The locked recipe hyperparameters (tuned for vanilla LoRA) are not
+   right for OPLoRA — it may need higher LR or more iters.
+3. The "top-k singular subspaces encode pretrained knowledge" hypothesis
+   is wrong for transformer weights in our regime. Forgetting may happen
+   through tail-singular updates that OPLoRA doesn't constrain.
+
+The ROI ranking at the top of this document ("OPLoRA is the lowest-risk
+first step") should be read with this empirical caveat. We did not run
+the k=8 or k=16 sweeps before pausing to update direction with the user.
