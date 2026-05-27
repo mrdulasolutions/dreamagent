@@ -38,3 +38,16 @@ class TrainConfig:
 
     # Validation split as fraction of the mix; rest goes to train
     val_fraction: float = 0.1
+
+    # ── OPLoRA (Path A · Week 1) ──
+    # Orthogonal Projection LoRA: project the LoRA update orthogonal to the
+    # top-k singular subspaces of each base weight. Reduces interference with
+    # pretrained knowledge — see docs/research/2026-05-improving-memory.md
+    # and src/dreamagent/train/oplora.py.
+    use_oplora: bool = False
+    oplora_k_singular: int = 32
+
+    # ── LoRA shape knobs surfaced for tuning (also used by OPLoRA) ──
+    lora_rank: int = 8
+    lora_scale: float = 20.0
+    lora_dropout: float = 0.0

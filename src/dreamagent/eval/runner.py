@@ -97,13 +97,18 @@ def run_eval(
     max_tokens: int = 64,
     verbose: bool = False,
 ) -> EvalReport:
-    """Load the model (optionally with adapter), generate, score every probe."""
+    """Load the model (optionally with adapter), generate, score every probe.
+
+    Uses dreamagent.train.oplora_load.load_model_with_optional_oplora so
+    both standard LoRA adapters and OPLoRA adapters work transparently.
+    """
     try:
-        from mlx_lm import generate, load
+        from mlx_lm import generate
     except ImportError as e:
         raise RuntimeError(
             "mlx_lm not installed — run `uv sync` from the project root"
         ) from e
+    from dreamagent.train.oplora_load import load_model_with_optional_oplora
 
     # mlx-lm's load_adapters expects the directory containing adapter_config.json
     # and adapters.safetensors, not the .safetensors file itself.
@@ -111,7 +116,7 @@ def run_eval(
     if adapter_path is not None:
         adapter_dir = adapter_path.parent if adapter_path.is_file() else adapter_path
         adapter_arg = str(adapter_dir)
-    model, tokenizer = load(model_repo, adapter_path=adapter_arg)
+    model, tokenizer = load_model_with_optional_oplora(model_repo, adapter_arg)
 
     report = EvalReport(model=model_repo, adapter_path=adapter_arg)
     for probe in probes:

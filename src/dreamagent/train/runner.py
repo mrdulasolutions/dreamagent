@@ -211,7 +211,25 @@ def train_adapter(
             metadata.json
 
     Raises TrainError if mlx-lm exits non-zero.
+
+    When `config.use_oplora=True`, dispatches to the in-process OPLoRA
+    runner (Path A · Week 1). All other config remains the same.
     """
+    if config.use_oplora:
+        # Local import to avoid loading mlx_lm at module import time.
+        from dreamagent.train.oplora_runner import train_adapter_oplora
+
+        return train_adapter_oplora(
+            mix=mix,
+            config=config,
+            run_dir=run_dir,
+            log_stream=log_stream,
+            tag=tag,
+            notes=notes,
+            invocation=invocation,
+            resume_adapter_file=resume_adapter_file,
+        )
+
     if not mix.examples:
         raise ValueError("cannot train on empty mix")
 

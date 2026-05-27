@@ -190,6 +190,20 @@ def dream(
     skip_train: bool = typer.Option(
         False, help="Compose + report only; do not train or evaluate."
     ),
+    use_oplora: bool = typer.Option(
+        False,
+        "--use-oplora/--use-vanilla-lora",
+        help=(
+            "Use OPLoRA (Orthogonal Projection LoRA, Path A · Week 1). "
+            "Projects the LoRA update orthogonal to top-k singular subspaces "
+            "of the base weights — aimed at reducing catastrophic forgetting. "
+            "Adds ~10 min one-time SVD setup on 8B-class models."
+        ),
+    ),
+    oplora_k_singular: int = typer.Option(
+        32,
+        help="k for OPLoRA: how many top singular vectors to project away (only used with --use-oplora).",
+    ),
 ) -> None:
     """End-to-end nightly pipeline: ingest → compose → train → eval → promote."""
     from datetime import UTC, datetime
@@ -248,6 +262,8 @@ def dream(
         num_layers=num_layers,
         batch_size=batch_size,
         learning_rate=learning_rate,
+        use_oplora=use_oplora,
+        oplora_k_singular=oplora_k_singular,
     )
 
     console.rule("training")
