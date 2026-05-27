@@ -9,6 +9,14 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- **V2.0 alpha — MCP server.** `dreamagent serve` exposes the live dreamed
+  adapter as a Model Context Protocol server over stdio. Any MCP-capable
+  client (Claude Code, Cursor, Hermes, OpenClaw) can install DreamAgent and
+  gain `query_memory` + `query_memory_with_lineage` tools. The dreamed model
+  becomes "the guy who knows" — a knowledge oracle the host agent calls when
+  it needs to know what the user has told it. Configured via env vars
+  (`DREAMAGENT_BASE_MODEL`, `DREAMAGENT_SNAPSHOTS_DIR`, `DREAMAGENT_MAX_TOKENS`).
+  Optional dependency `dreamagent[mcp]`.
 - **V1 Pass 2/3 complete on Llama 3.1 8B Instruct.** 7-night chained-training
   drill: all 7 nights PROMOTED, zero rejects, personal recall climbed 44% → 81%
   with regression bounded at 0–13.3pp. Full trajectory + benchmark suite

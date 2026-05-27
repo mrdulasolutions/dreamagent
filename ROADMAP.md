@@ -53,12 +53,16 @@ HTTP, or in-process. The dreamed model is "the guy who knows."
 - Architectural compatibility: V2 doesn't compete with mem0/Letta — it
   *augments* them.
 
-### V2.0 — MCP server stub  ·  Target: July 2026
+### V2.0 — MCP server stub  ·  Status: ✅ alpha (May 2026)
 
-- `dreamagent serve` exposes the live adapter as an MCP server
-- Single tool: `query_memory(question: str) -> { answer, confidence, sources }`
-- Connection-tested against Claude Code, Cursor, Hermes
-- `examples/03-mcp-integration/` cookbook entry
+- ✅ `dreamagent serve` exposes the live adapter as an MCP server
+- ✅ Tools: `query_memory(question)` and `query_memory_with_lineage(question)`
+- ✅ FastMCP over stdio, transport-agnostic per MCP spec
+- ✅ Config via env vars (`DREAMAGENT_BASE_MODEL`, `DREAMAGENT_SNAPSHOTS_DIR`,
+  `DREAMAGENT_MAX_TOKENS`) — the right pattern for MCP-host-launched servers
+- ✅ Updated [`examples/07-mcp-memory-backend/`](examples/07-mcp-memory-backend/)
+  with real Claude Code / Cursor configs
+- ⏳ Live connection test against a real Claude Code install (user-side)
 
 ### V2.1 — HTTP API + benchmark wins  ·  Target: September 2026
 

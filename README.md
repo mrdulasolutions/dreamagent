@@ -175,7 +175,7 @@ src/dreamagent/
     eval/           — substring-match scoring · personal + general probes
     promote/        — 4-decision eval gate · snapshot · rollback
     merge/          — weekly mergekit consolidation (V2, scaffolded)
-    serve/          — MLX-LM / Ollama / MCP hot-swap (V2, scaffolded)
+    serve/          — MCP server (V2.0 alpha — live, `dreamagent serve`)
     cli.py          — typer entry point
 ```
 
