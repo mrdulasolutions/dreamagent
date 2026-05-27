@@ -1,0 +1,14 @@
+{
+  "name": "general_capability",
+  "snapshot": "runs/snapshots/live",
+  "timestamp_utc": "2026-05-27T17:09:15.198955+00:00",
+  "metrics": {
+    "probe_count": 30,
+    "base_pass_rate": 0.9666666666666667,
+    "adapter_pass_rate": 0.9,
+    "regression_points": 0.06666666666666665,
+    "regression_percent": 6.666666666666665,
+    "base_model": "mlx-community/Meta-Llama-3.1-8B-Instruct-4bit"
+  },
+  "detail": null
+}

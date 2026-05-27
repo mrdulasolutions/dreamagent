@@ -1,0 +1,13 @@
+{
+  "name": "personal_recall",
+  "snapshot": "runs/snapshots/live",
+  "timestamp_utc": "2026-05-27T17:07:50.221055+00:00",
+  "metrics": {
+    "total_probes": 48,
+    "passed": 36,
+    "pass_rate": 0.75,
+    "memories_source": "fixture:v1_baseline",
+    "base_model": "mlx-community/Meta-Llama-3.1-8B-Instruct-4bit"
+  },
+  "detail": null
+}

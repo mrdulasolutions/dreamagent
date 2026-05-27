@@ -1,0 +1,15 @@
+{
+  "name": "cross_memory_reasoning",
+  "snapshot": "runs/snapshots/live",
+  "timestamp_utc": "2026-05-27T17:10:17.600037+00:00",
+  "metrics": {
+    "probe_count": 10,
+    "base_pass_rate": 0.3,
+    "adapter_pass_rate": 0.9,
+    "improvement_points": 0.6000000000000001,
+    "improvement_percent": 60.00000000000001,
+    "base_model": "mlx-community/Meta-Llama-3.1-8B-Instruct-4bit",
+    "note": "Cross-memory probes require synthesis across 2-3 memories. If adapter > base, parametric memory delivers reasoning that single-pass retrieval cannot."
+  },
+  "detail": null
+}

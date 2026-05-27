@@ -1,0 +1,17 @@
+{
+  "name": "identity_drift",
+  "snapshot": "runs/snapshots/live",
+  "timestamp_utc": "2026-05-27T17:12:02.504451+00:00",
+  "metrics": {
+    "probe_count": 8,
+    "base_pass_rate": 0.625,
+    "adapter_pass_rate": 0.75,
+    "drift_points": -0.125,
+    "drift_percent": -12.5,
+    "alert": false,
+    "alert_message": "OK",
+    "base_model": "mlx-community/Meta-Llama-3.1-8B-Instruct-4bit",
+    "note": "Single-snapshot read. Long-horizon trend tracking requires running this against multiple nightly snapshots and plotting the series."
+  },
+  "detail": null
+}

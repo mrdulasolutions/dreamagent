@@ -1,0 +1,18 @@
+{
+  "name": "query_latency",
+  "snapshot": "runs/snapshots/live",
+  "timestamp_utc": "2026-05-27T17:11:17.788459+00:00",
+  "metrics": {
+    "sample_count": 28,
+    "warmup_skipped": 2,
+    "p50_ms": 1080.4958544904366,
+    "p95_ms": 2246.560125029646,
+    "p99_ms": 2266.224500024691,
+    "min_ms": 799.8173749656416,
+    "max_ms": 2266.224500024691,
+    "mean_ms": 1324.9816340020127,
+    "max_tokens": 48,
+    "base_model": "mlx-community/Meta-Llama-3.1-8B-Instruct-4bit"
+  },
+  "detail": null
+}
