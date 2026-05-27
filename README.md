@@ -175,20 +175,38 @@ Honest answer: **yes, but with a more nuanced story than we originally claimed.*
 
 The 7-night stability test: every single night promoted, zero failures. Full data: [`docs/tuning/llama-3.1-8b-instruct-4bit.md`](docs/tuning/llama-3.1-8b-instruct-4bit.md).
 
-### Head-to-head vs vector-retrieval (V2.1, the honest comparison)
+### Head-to-head against retrieval baselines (V2.1 + V2.2)
 
-We initially framed a +60pp cross-memory-reasoning result as DreamAgent's headline. **That comparison was against the base model with no memory access** — not against a fair retrieval baseline. When we built a real comparison (sentence-transformers + top-5 → same base model), the picture is more humble:
+We initially framed a +60pp cross-memory-reasoning result as DreamAgent's headline. Two follow-up experiments substantially narrowed that claim. Both are documented in full and reproducible.
 
-| Probe set | DreamAgent | Retrieval baseline | DreamAgent advantage |
+**V2.1: DreamAgent vs vector-retrieval baseline** (same base model, same memories):
+
+| Probe set | DreamAgent | Retrieval | Δ |
 |---|---|---|---|
 | Personal recall | 75.0% | 68.8% | **+6.2pp** |
 | Cross-memory reasoning | 90.0% | 90.0% | **+0.0pp** |
 
-DreamAgent has a modest, real personal-recall advantage. The cross-memory parity result means retrieval-based memory systems can synthesize across memories at least as well as the dreamed model, when the right memories are retrieved. We retracted the "3× improvement" framing.
+**V2.2: Three-way + adversarial probes** (15 questions designed to defeat retrieval, plus a composed system that queries both DA and retrieval and reconciles):
 
-What DreamAgent still uniquely offers: **privacy** (no external index), **host-agent independence** (works with any MCP client), and **immunity to retrieval failures**. The V2 thesis is therefore "DreamAgent + retrieval, composed" — not "DreamAgent replaces retrieval." Details: [`docs/tuning/v2.1-vs-baselines.md`](docs/tuning/v2.1-vs-baselines.md).
+| Probe set | DreamAgent | Retrieval | Composed |
+|---|---|---|---|
+| Personal recall (n=48) | **75.0%** | 68.8% | 64.6% |
+| Cross-memory reasoning (n=10) | 90.0% | 90.0% | 90.0% |
+| Adversarial (n=15) | 80.0% | **93.3%** | 86.7% |
 
-We publish this retraction in the same commit as the new claim, on purpose.
+**What this means honestly:**
+- DreamAgent has a real but modest **+6.2pp personal-recall edge** on a 50-memory fixture.
+- On cross-memory reasoning, retrieval and DreamAgent are at parity.
+- On "adversarial" probes we *designed* to favor parametric memory, retrieval actually won.
+- Composition (DA + retrieval reconciled) didn't beat the best individual system on any probe set.
+
+**Why you'd still choose DreamAgent** (these are structural, not benchmark wins):
+- **Privacy**: model weights on your disk; no embeddings persisted; no external service.
+- **Host-agent independence**: works with any MCP client; survives switching from Claude → GPT → local Llama.
+- **Operational simplicity**: one process, one adapter file, no vector database to manage.
+- **GDPR-clear deletion**: rebuild from source + roll back affected adapters.
+
+We're publishing both retractions in the same commits as the new measurements. Detailed analysis: [`docs/tuning/v2.1-vs-baselines.md`](docs/tuning/v2.1-vs-baselines.md), [`docs/tuning/v2.2-adversarial-and-composed.md`](docs/tuning/v2.2-adversarial-and-composed.md).
 
 ---
 

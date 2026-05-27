@@ -9,6 +9,20 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- **V2.2 — adversarial probe set + three-way head-to-head.** 15 hand-authored
+  adversarial probes (`benchmarks/probes/adversarial_retrieval.jsonl`) designed
+  to defeat vector retrieval via low-similarity question framings, plus a
+  three-way runner (`benchmarks/three_way.py`) comparing DreamAgent /
+  retrieval / composed-with-reconciler. Result: **retrieval outperformed
+  DreamAgent on the very probes we designed to favor parametric memory
+  (80% DA vs 93.3% retrieval). Composition did not beat the best single
+  system on any probe set, and actively hurt personal recall (64.6% composed
+  vs 75.0% DA alone).** See [`docs/tuning/v2.2-adversarial-and-composed.md`](docs/tuning/v2.2-adversarial-and-composed.md)
+  and the second-retraction note in "Changed" below.
+- **V2.2 — composition cookbook.** [`examples/08-mem0-plus-dreamagent/`](examples/08-mem0-plus-dreamagent/)
+  ships the production-shape mem0 + DreamAgent integration pattern. Honest
+  caveats included (composition didn't beat DA alone on our personal-recall
+  measure).
 - **V2.1 — vector-retrieval baseline + head-to-head benchmark.** New
   `benchmarks/vs_baselines.py` runs the same memories + probes through
   DreamAgent and a sentence-transformers + top-5 retrieval baseline using
@@ -31,6 +45,27 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
+- **V2.2 second retraction — adversarial probes did NOT favor parametric
+  memory, and composition did NOT win.** Beyond the V2.1 retraction below,
+  the V2.2 three-way benchmark showed (a) retrieval beat DreamAgent
+  93.3% vs 80% on probes we *designed* to favor parametric memory, and
+  (b) the composed DA + retrieval + reconciler system underperformed
+  DreamAgent alone on personal recall (64.6% vs 75.0%). Both outcomes
+  were pre-registered in PAPER §10.5 as falsifiable. The V2.2 "composition
+  is the primary value prop" framing from one commit ago is itself
+  retracted. The defensible empirical claim is now narrowly **+6.2pp
+  personal recall at N=50**. README "Does it actually work?",
+  PAPER §6.6/§7.1/§10.2/§10.5/§11, and ROADMAP V2.2/V2.3/V2.4 are all
+  revised. The cookbook ([`examples/08-mem0-plus-dreamagent/`](examples/08-mem0-plus-dreamagent/))
+  ships with honest caveats and the recommendation that composition
+  with a naive reconciler is not the default. Detail:
+  [`docs/tuning/v2.2-adversarial-and-composed.md`](docs/tuning/v2.2-adversarial-and-composed.md).
+- **V2 positioning shifts from "capability wins" to "structural wins".**
+  After two pre-registered falsifications materialized, DreamAgent's
+  value proposition is now: privacy (no external index), host-agent
+  independence (any MCP client), operational simplicity, GDPR-clear
+  deletion. These are real and matter for many use cases. They are not
+  benchmark wins against modern retrieval systems.
 - **Cross-memory reasoning claim retracted and revised.** The V1 benchmark
   suite reported +60pp cross-memory reasoning improvement (base 30% →
   adapter 90%). That comparison was vs the base model with no memory
@@ -40,8 +75,9 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   to reflect this. The +6.2pp personal-recall advantage is real and
   remains. Detail:
   [`docs/tuning/v2.1-vs-baselines.md`](docs/tuning/v2.1-vs-baselines.md).
-- **ROADMAP V2.2:** mem0 + DreamAgent composition cookbook promoted from
-  polish to the primary V2.2 deliverable.
+- **ROADMAP V2.3/V2.4:** new sections covering the work the V2.2
+  negatives imply (better adversarial probes, smarter reconcilers,
+  measured comparison to mem0/Letta specifically, 30-night Pass 3).
 - **V1 Pass 2/3 complete on Llama 3.1 8B Instruct.** 7-night chained-training
   drill: all 7 nights PROMOTED, zero rejects, personal recall climbed 44% → 81%
   with regression bounded at 0–13.3pp. Full trajectory + benchmark suite

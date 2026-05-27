@@ -77,14 +77,33 @@ HTTP, or in-process. The dreamed model is "the guy who knows."
 
 The unmet target on the cross-memory advantage drives the V2.2 reframe.
 
-### V2.2 — Composition + production hardening  ·  Status: critical (May 2026 update)
+### V2.2 — Adversarial + composed benchmarks  ·  Status: ✅ shipped (May 2026, with negative results)
 
-After the V2.1 head-to-head showed retrieval matching DreamAgent on cross-memory reasoning, **the composition story is no longer optional**:
+We built and measured the adversarial probe set and the three-way composed runner. Results:
 
-- **mem0 + DreamAgent composition cookbook** (run both, reconcile at agent) — promoted from polish to V2.2's primary deliverable
-- Adversarial probe set where retrieval is forced to fail (semantic-distance attacks)
-- Adapter signing for trust
+- ✅ 15 adversarial probes built, designed to defeat retrieval — see [`benchmarks/probes/adversarial_retrieval.jsonl`](benchmarks/probes/adversarial_retrieval.jsonl)
+- ✅ Three-way benchmark runner ([`benchmarks/three_way.py`](benchmarks/three_way.py)) with DA / retrieval / composed columns
+- ✅ Composition cookbook shipped at [`examples/08-mem0-plus-dreamagent/`](examples/08-mem0-plus-dreamagent/)
+- ❌ **DreamAgent < Retrieval on adversarial (80% vs 93.3%)** — our probes weren't adversarial enough
+- ❌ **Composition < max(DA, retrieval) on personal recall (64.6% vs 75%)** — naive reconciler hurts
+- Full analysis: [`docs/tuning/v2.2-adversarial-and-composed.md`](docs/tuning/v2.2-adversarial-and-composed.md)
+
+The negative results retract the V2.1-era "composition is the V2 product story" framing. Composition still ships as an *option* but is no longer recommended as the default.
+
+### V2.3 — What the V2.2 negatives imply  ·  Status: 🔬 in design
+
+The unmet V2.2 targets point at four directions:
+
+- **Build genuinely adversarial probes**: N≥1000 corpora; embedding-distance-selected probes; retrieval-with-forced-misses regime
+- **Build a smarter reconciler**: "pick-the-better-one" rather than "summarize both"; possibly with confidence-aware routing
+- **Measured comparison against mem0 / Letta / Zep specifically** (not just our simple sentence-transformers baseline)
+- **30-night true Pass 3 drill** — the V1 commitment that was compressed to 7
+
+### V2.4 — Production hardening  ·  Status: deferred
+
+- Adapter signing for trust in multi-user contexts
 - Multi-user namespacing
+- Smarter reconciler designs from V2.3 productionized
 
 ---
 
