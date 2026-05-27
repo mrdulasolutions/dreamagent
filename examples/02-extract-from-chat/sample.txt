@@ -1,0 +1,23 @@
+Hey assistant! Quick brain dump for you.
+
+A few things about me: my name is Sam, I'm a backend engineer at a
+fintech called Quartile, and I live in Brooklyn. My dog is named
+Marlowe — she's a 4-year-old Australian shepherd we adopted in
+March 2024.
+
+A few preferences for how you respond:
+- Concise. No "Certainly! Here's..." preamble.
+- Code examples over prose when I'm learning a library.
+- I prefer asyncio over threads in Python.
+
+Tooling I use daily: uv for Python project management, ruff for
+linting, pytest for tests. To run our test suite I do
+`uv run pytest -q --tb=short`. We deploy to Fly.io via
+`flyctl deploy --remote-only` after merging to main.
+
+Today is 2026-05-27 and I just merged the dark-mode PR. I'm tired,
+running on like 5 hours of sleep, but I'm gonna push through and
+get the auth refactor done.
+
+Oh — heads up, I corrected something earlier. My dog's birthday is
+actually March 14, not March 12 like I said in our chat last week.
