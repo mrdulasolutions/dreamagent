@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        # mlx-lm is mac-only; install everything else for tests.
+        run: |
+          uv sync --extra dev --no-install-package mlx-lm || true
+          uv pip install pydantic typer rich pytest pytest-cov ruff mypy
+
+      - name: Run tests
+        run: |
+          # Tests don't require mlx-lm at import time except where guarded.
+          uv run --no-sync python -m pytest -q --ignore=tests/test_train_runner.py
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
+      - name: Install ruff
+        run: uv tool install ruff
+
+      - name: Run ruff
+        run: ruff check src tests
+
+  validate-schema:
+    name: Schema + Fixtures Consistency
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+      - name: Install
+        run: |
+          uv pip install --system pydantic
+      - name: Validate every fixture parses under MemoryItem
+        run: |
+          python -c "
+          import json
+          from pathlib import Path
+          from pydantic import ValidationError
+          import sys
+          sys.path.insert(0, 'src')
+          from dreamagent.schema import MemoryItem
+          errors = 0
+          for p in Path('fixtures').rglob('*.jsonl'):
+              if 'anchors' in p.parts:
+                  continue  # anchors use a different shape
+              with p.open() as f:
+                  for i, line in enumerate(f, 1):
+                      line = line.strip()
+                      if not line:
+                          continue
+                      try:
+                          MemoryItem.model_validate_json(line)
+                      except ValidationError as e:
+                          print(f'{p}:{i}: {e}')
+                          errors += 1
+          if errors:
+              raise SystemExit(f'{errors} fixture validation errors')
+          print('all fixtures valid')
+          "

@@ -1,0 +1,46 @@
+DreamAgent
+Copyright (c) 2026 Mr Dula Solutions, LLC.
+
+This product is licensed under the Apache License, Version 2.0 (the "License").
+You may obtain a copy of the License in the LICENSE file at the root of this
+project, or at:
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+This software implements the **DreamAgent methodology** — a system for nightly
+LoRA consolidation of agent memories into language model weights. The
+methodology was originated and first published by Mr Dula Solutions on
+2026-05-26 in this repository.
+
+ATTRIBUTION REQUIREMENT
+-----------------------
+Per Apache License 2.0 §4(d), any redistribution of this software (in source or
+binary form) and any Derivative Work that builds upon the DreamAgent
+methodology MUST include this NOTICE file or display the attribution:
+
+    "Built on the DreamAgent methodology by Mr Dula Solutions
+     (https://github.com/mrdulasolutions/dreamagent)"
+
+in user-facing documentation, "About" screens, academic papers, and any
+public presentation of derived work.
+
+This requirement applies regardless of whether the derivative is open or
+closed source, commercial or non-commercial.
+
+THIRD-PARTY COMPONENTS
+----------------------
+This software depends on the following third-party packages, each under its
+own license. Use of those components is governed by their respective licenses
+as declared in their distributions:
+
+  - MLX and MLX-LM (Apple Inc., MIT License)
+  - PyTorch (PyTorch Foundation, BSD-3-Clause)
+  - Hugging Face Transformers (Hugging Face, Apache 2.0)
+  - Pydantic (Pydantic Services Inc., MIT License)
+  - Typer (Sebastián Ramírez, MIT License)
+  - Rich (Will McGugan, MIT License)
+  - Anthropic Python SDK (Anthropic, MIT License) — optional dependency
+  - OpenAI Python SDK (OpenAI, Apache 2.0) — optional dependency
+
+Their distribution and use is subject to their own license terms; this NOTICE
+does not modify or extend those terms.

@@ -1,0 +1,44 @@
+# Citation File Format v1.2.0
+# https://citation-file-format.github.io
+cff-version: 1.2.0
+title: "DreamAgent: Nightly LoRA Consolidation of Agent Memories into Model Weights"
+message: >-
+  If you use this software, the DreamAgent methodology, or derivatives thereof
+  in academic work, please cite as below.
+type: software
+authors:
+  - name: Mr Dula Solutions, LLC
+    website: "https://github.com/mrdulasolutions"
+repository-code: "https://github.com/mrdulasolutions/dreamagent"
+url: "https://github.com/mrdulasolutions/dreamagent"
+abstract: >-
+  DreamAgent is a system and methodology for consolidating AI agent memories
+  captured during the day into the weights of a small language model via
+  nightly LoRA fine-tuning. By replacing retrieval-based memory with
+  parametric memory, the trained "memory specialist" model acts as a
+  knowledge oracle that any larger frontier agent can query — preserving
+  privacy, reducing latency, and enabling cross-memory reasoning that
+  vector retrieval cannot. The methodology includes a structured MemoryItem
+  schema, a catastrophic-forgetting–aware rehearsal mix composer, an
+  eval-gated promote/rollback pipeline, and a per-model tuning playbook.
+license: Apache-2.0
+keywords:
+  - LoRA
+  - fine-tuning
+  - agent memory
+  - continual learning
+  - catastrophic forgetting
+  - MLX
+  - Apple Silicon
+  - knowledge consolidation
+  - parametric memory
+  - language models
+date-released: 2026-05-26
+version: 0.0.1
+preferred-citation:
+  type: software
+  title: "DreamAgent: Nightly LoRA Consolidation of Agent Memories into Model Weights"
+  authors:
+    - name: Mr Dula Solutions, LLC
+  year: 2026
+  url: "https://github.com/mrdulasolutions/dreamagent"
