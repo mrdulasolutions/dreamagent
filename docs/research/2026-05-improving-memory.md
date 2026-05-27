@@ -1,7 +1,7 @@
 # How to Actually Improve DreamAgent's Memory
 
 **Date:** 2026-05-27
-**Status:** Research + one negative empirical result. OPLoRA k=32 was tested at the locked V1 recipe and did **not** improve over vanilla LoRA — see [`docs/tuning/oplora-k32-validation.md`](../tuning/oplora-k32-validation.md). The research below stands as written; the post-hoc empirical correction is at the bottom under [Empirical update — 2026-05-27 (OPLoRA k=32)](#empirical-update--2026-05-27-oplora-k32).
+**Status:** Research + **two** negative empirical results. Both OPLoRA k=32 ([details](../tuning/oplora-k32-validation.md)) and SMFT s=0.10 ([details](../tuning/smft-s10-validation.md)) were tested at the locked V1 recipe and **both underperform vanilla LoRA**. The research below stands as written; the post-hoc empirical correction is at the bottom under [Empirical update — 2026-05-27](#empirical-update--2026-05-27).
 
 ## Why this document exists
 
@@ -190,7 +190,9 @@ This is your decision. I'm not going to start implementing until you say which d
 
 ---
 
-## Empirical update — 2026-05-27 (OPLoRA k=32)
+## Empirical update — 2026-05-27
+
+### OPLoRA k=32 — falsified
 
 We implemented OPLoRA (`src/dreamagent/train/oplora.py`, commit
 `5da5525`, 12 unit tests verifying the math) and ran it at k=32 on the
@@ -206,18 +208,50 @@ locked V1 production recipe (Llama 3.1 8B Instruct, 90 iters, LR 3e-5,
 
 Full data: [`docs/tuning/oplora-k32-validation.md`](../tuning/oplora-k32-validation.md).
 
-The hypothesis above — "OPLoRA reduces catastrophic forgetting because
-it leaves the top-k singular directions of the base weight untouched" —
-did not hold at k=32 with the locked recipe. Either:
+### SMFT s=0.10 — falsified harder
 
-1. k=32 was too aggressive (the OPLoRA paper used k=32 but on different
-   models / tasks). Smaller k (8 or 16) might preserve more update capacity.
-2. The locked recipe hyperparameters (tuned for vanilla LoRA) are not
-   right for OPLoRA — it may need higher LR or more iters.
-3. The "top-k singular subspaces encode pretrained knowledge" hypothesis
-   is wrong for transformer weights in our regime. Forgetting may happen
-   through tail-singular updates that OPLoRA doesn't constrain.
+We implemented SMFT (`src/dreamagent/train/smft.py`, commit `8177719`,
+11 unit tests verifying the gradient-masking math) and ran it at
+sparsity=0.10 on the same locked recipe. Results were **worse than
+vanilla on every axis**:
 
-The ROI ranking at the top of this document ("OPLoRA is the lowest-risk
-first step") should be read with this empirical caveat. We did not run
-the k=8 or k=16 sweeps before pausing to update direction with the user.
+| Metric | Vanilla LoRA | SMFT s=0.10 |
+|---|---|---|
+| Personal recall (N=48) | 43.75% | **35.42%** (−8.3pp) |
+| General regression (N=30) | 0.0pp | **−6.67pp** |
+| Cross-memory vs retrieval | n/a | **−60pp** vs retrieval baseline |
+| Gate decision | PROMOTE | PROMOTE_WITH_WARNING |
+
+Full data: [`docs/tuning/smft-s10-validation.md`](../tuning/smft-s10-validation.md).
+
+### Pattern across both falsifications
+
+Both OPLoRA and SMFT caused **real general-capability damage** (−6.67pp
+each) on **different probes** — confirming the damage is technique-driven,
+not probe noise. Both techniques also failed to deliver the personal
+recall improvement they were hypothesized to give. Vanilla LoRA at the
+locked recipe remains the production champion on every measured axis.
+
+### What this means for the research above
+
+The ROI ranking at the top of this document ("OPLoRA + Sparse Memory
+Finetuning are the best bets") was **wrong** at the configurations we
+tested. The research wasn't bad — both techniques DO reduce forgetting
+on the paper's benchmarks — but the transfer to our single-night
+Llama 3.1 8B locked-recipe regime doesn't hold at paper-default
+hyperparameters.
+
+Possible reasons (none disambiguated by these two runs):
+
+1. **Hyperparameters wrong for this regime.** Both papers tuned at
+   different LR / iters / sparsity / k than the V1 locked recipe.
+2. **Training-budget confound.** Both papers ran much longer than 90
+   iters. The forgetting-reduction may need to accumulate over many
+   updates before it pays off.
+3. **The "interference" mental model is wrong.** Maybe forgetting in our
+   regime doesn't come from "top-k singular subspaces being overwritten"
+   (OPLoRA's hypothesis) or "irrelevant parameters being updated"
+   (SMFT's hypothesis). Maybe it comes from somewhere these techniques
+   don't address.
+
+This is now a decision point for the project. See task #73.
