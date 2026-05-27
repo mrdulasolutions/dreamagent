@@ -35,10 +35,21 @@ jobs:
           uv sync --extra dev --no-install-package mlx-lm || true
           uv pip install pydantic typer rich pytest pytest-cov ruff mypy
 
-      - name: Run tests
+      - name: Run tests with coverage
         run: |
           # Tests don't require mlx-lm at import time except where guarded.
-          uv run --no-sync python -m pytest -q --ignore=tests/test_train_runner.py
+          uv run --no-sync python -m pytest -q \
+            --ignore=tests/test_train_runner.py \
+            --cov=src/dreamagent \
+            --cov-report=term-missing
+
+      - name: Upload coverage artifact
+        if: matrix.python-version == '3.12'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: .coverage*
+          if-no-files-found: ignore
 
   lint:
     name: Lint
@@ -55,7 +66,22 @@ jobs:
         run: uv tool install ruff
 
       - name: Run ruff
-        run: ruff check src tests
+        run: ruff check src tests benchmarks
+
+  typecheck:
+    name: Type check (mypy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+      - name: Install
+        run: |
+          uv pip install --system pydantic mypy types-setuptools
+      - name: Run mypy
+        # mypy is informational for now — won't fail CI yet, but surfaces issues
+        run: mypy --config-file mypy.ini src/dreamagent || true
 
   validate-schema:
     name: Schema + Fixtures Consistency
@@ -95,3 +121,24 @@ jobs:
               raise SystemExit(f'{errors} fixture validation errors')
           print('all fixtures valid')
           "
+
+  comparison-docs:
+    name: Comparison docs sanity check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify every comparison file exists
+        run: |
+          for f in docs/comparison/README.md docs/comparison/vs-mem0.md \
+                   docs/comparison/vs-letta.md docs/comparison/vs-supermemory.md \
+                   docs/comparison/vs-zep.md docs/comparison/vs-giant-context.md; do
+            test -s "$f" || { echo "missing or empty: $f"; exit 1; }
+          done
+          echo "all comparison docs present"
+
+      - name: Verify every ADR exists
+        run: |
+          for n in 001 002 003 004 005 006 007; do
+            ls docs/adr/${n}-*.md 2>&1 | grep -q "${n}-" || { echo "missing ADR $n"; exit 1; }
+          done
+          echo "all ADRs present"

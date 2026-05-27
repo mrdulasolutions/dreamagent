@@ -1,0 +1,54 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: '\.(md|jsonl)$'
+      - id: end-of-file-fixer
+        exclude: '\.(jsonl)$'
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+        exclude: 'examples/'
+      - id: check-added-large-files
+        args: ['--maxkb=500']
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.5
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+        files: ^(src|tests|benchmarks)/.*\.py$
+      - id: ruff-format
+        files: ^(src|tests|benchmarks)/.*\.py$
+
+  - repo: local
+    hooks:
+      - id: validate-memory-fixtures
+        name: Validate memory fixtures against MemoryItem schema
+        entry: bash -c 'cd $(git rev-parse --show-toplevel) && python -c "
+import json, sys
+from pathlib import Path
+sys.path.insert(0, \"src\")
+from dreamagent.schema import MemoryItem
+errors = 0
+for p in Path(\"fixtures\").rglob(\"*.jsonl\"):
+    if \"anchors\" in p.parts:
+        continue
+    with p.open() as f:
+        for i, line in enumerate(f, 1):
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                MemoryItem.model_validate_json(line)
+            except Exception as e:
+                print(f\"{p}:{i}: {e}\"); errors += 1
+sys.exit(1 if errors else 0)
+"'
+        language: system
+        files: '^fixtures/.*\.jsonl$'
+        pass_filenames: false

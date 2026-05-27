@@ -49,6 +49,7 @@ dev = [
     "pytest-cov>=6.0",
     "ruff>=0.9",
     "mypy>=1.13",
+    "pre-commit>=4.0",
 ]
 
 [project.scripts]
@@ -75,3 +76,24 @@ select = ["E", "F", "I", "B", "UP", "N", "SIM", "RUF"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
+
+[tool.coverage.run]
+branch = true
+source = ["src/dreamagent"]
+omit = [
+    "src/dreamagent/extract/backends/*",
+    "src/dreamagent/serve/*",
+    "src/dreamagent/merge/*",
+]
+
+[tool.coverage.report]
+precision = 1
+show_missing = true
+skip_empty = true
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "\\.\\.\\.",
+]

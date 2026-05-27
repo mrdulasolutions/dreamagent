@@ -1,73 +1,93 @@
 # DreamAgent
 
-> **An LLM that dreams.**
-> By day it captures memories. By night a cron job fine-tunes a small model on them — so the next morning the model knows what you told it yesterday, *from its weights*, with no retrieval.
+> **Memories belong in weights, not vectors.**
+> Every other agent memory system in 2026 (mem0, Letta, Supermemory, Zep) consolidates your memories into text you retrieve. DreamAgent consolidates them into **the weights of a small model that runs on your laptop**, via nightly LoRA fine-tuning with eval-gated promotion and one-command rollback. It's the memory specialist your frontier agent calls when it needs to know who you are.
 
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-114%20passing-brightgreen.svg)](#tests)
-[![Status: V1 Phase 1 — viability proven](https://img.shields.io/badge/V1%20Phase%201-viability%20proven-success.svg)](docs/tuning/llama-3.2-1b-instruct-4bit.md)
+<p>
+  <a href="LICENSE"><img alt="License: Apache 2.0" src="https://img.shields.io/badge/License-Apache_2.0-blue.svg"></a>
+  <a href="https://www.python.org/downloads/"><img alt="Python 3.12+" src="https://img.shields.io/badge/python-3.12+-blue.svg"></a>
+  <img alt="Tests: 114 passing" src="https://img.shields.io/badge/tests-114%20passing-brightgreen.svg">
+  <a href="docs/tuning/llama-3.2-1b-instruct-4bit.md"><img alt="V1 Pass 1: PROMOTE" src="https://img.shields.io/badge/V1%20Pass%201-PROMOTE-success.svg"></a>
+  <a href="CITATION.cff"><img alt="Cite" src="https://img.shields.io/badge/cite-CITATION.cff-blue.svg"></a>
+</p>
+
+---
+
+## DreamAgent vs. The Field
+
+| | [mem0](https://github.com/mem0ai/mem0) | [Letta](https://github.com/letta-ai/letta) | [Supermemory](https://supermemory.ai/) | **DreamAgent** |
+|---|---|---|---|---|
+| Paradigm | Vector + graph + entity | Hierarchical text blocks | Vector index | **LoRA weights** |
+| Where memory lives at query time | External index | Memory blocks | Cloud | **In the model** |
+| Cross-memory reasoning | Within retrieved chunks | Within context blocks | Within retrieved chunks | **Across all trained memories** |
+| Local-only | Self-host option | Yes | No (cloud) | **Yes (Apple Silicon native)** |
+| Switching cost from frontier model | Use their SDK | Use their runtime | Use their API | **Zero — it's a backend** |
+| LoCoMo benchmark | 92.5%* | 83.2% | ~70% | [Different axis](docs/comparison/README.md) |
+| Failure mode | "Found nothing similar" (silent) | Limited context | Server error | **Eval gate REJECT, rollback** |
+
+*\*mem0's self-reported number on their April 2026 algorithm. Independent measurements vary 66-92.5%. See [comparison docs](docs/comparison/README.md).*
+
+**DreamAgent is on a different axis than the retrieval incumbents.** They consolidate to text; we consolidate to weights. In production we **compose** with them, we don't replace them. See [`docs/comparison/`](docs/comparison/) for honest head-to-heads with each.
 
 ---
 
 ## The Idea
 
-Every agent memory system today — mem0, supermemory, Letta, Claude memory, OpenClaw, Hermes — consolidates memories into **text files** the model reads at runtime. RAG. Retrieval. Context-stuffing.
+```mermaid
+flowchart LR
+    subgraph "By Day"
+        user[/"You"/]
+        agent["Your daily-driver agent<br/>(Claude / GPT / Llama 70B)"]
+        mem0[(mem0 / supermemory /<br/>OpenClaw / Hermes /<br/>raw JSONL)]
+        user -->|chats with| agent
+        agent -->|writes memories to| mem0
+    end
 
-**DreamAgent goes one step further.** It runs a nightly LoRA fine-tune on the day's memories so they become part of the model's **weights**. Like sleep consolidates the hippocampus into the cortex, DreamAgent moves "today I learned" from retrieval to parametric knowledge.
+    subgraph "By Night (cron 3 AM)"
+        mem0 -->|"MemoryItem<br/>stream"| compose["compose<br/>+ rehearsal mix"]
+        compose --> train["LoRA fine-tune<br/>~25s on Mac<br/>via MLX-LM"]
+        train --> eval["eval gate<br/>(personal recall +<br/>general capability)"]
+        eval -->|PROMOTE| live[("live<br/>adapter")]
+        eval -.->|REJECT| rejected[(rejected/)]
+    end
 
-The result is a tiny model — Qwen 3 4B or Llama 3.2 1B class — that has *seen all your memories together*. It doesn't return chunks; it reasons across them. It's the **memory specialist** every larger agent (Claude, GPT, Llama 70B) can query as their "guy who knows."
+    live -.->|"v2: queried via MCP<br/>by your frontier agent"| agent
 
+    style live fill:#27ae60,stroke:#1e8449,color:#fff
+    style rejected fill:#c0392b,stroke:#922b21,color:#fff
+    style train fill:#2980b9,stroke:#1f618d,color:#fff
 ```
-                    YOU                          DREAMAGENT (a small fine-tuned LLM)
-                     │
-        ┌────────────┴────────────┐                        ▲
-        ▼                         ▼                        │
-   Claude / GPT                Mem0 / Supermemory          │
-   (your daily-driver agent)   (or any memory store)       │
-        │                         │                        │
-        └─────────────┬───────────┘                        │
-                      │ stream of MemoryItems              │
-                      ▼                                    │
-                ╔══════════════╗                           │
-                ║  DreamAgent  ║  ── nightly cron ─────────┘
-                ║   pipeline   ║      compose · train ·
-                ╚══════════════╝      eval · promote
-                                          (weights updated)
-```
 
-When your daily agent needs to know something about you, it asks DreamAgent. DreamAgent answers from weights — not from a vector index. No memories ever leave the box.
+By day, an upstream memory system (any of the existing ones) emits `MemoryItem` records — that part is solved. By night, DreamAgent consolidates them into the **weights** of a small open-source model via LoRA fine-tuning. The trained model is "the guy who knows" — a memory specialist any larger agent can query as a knowledge oracle.
+
+Like sleep moves the day's experiences from hippocampus to neocortex, DreamAgent moves your memories from retrieval to parametric knowledge.
 
 ---
 
 ## Why This Matters
 
-1. **Privacy is structural.** Memories are consolidated locally on Apple Silicon. They never traverse a third-party API to become parametric.
-2. **Reasoning, not retrieval.** A vector index returns the closest chunks. A dreamed model *understands the connections* between memories — because it saw them all together during training.
-3. **Cross-agent memory.** Switch from Claude to GPT to a local Llama whenever — your DreamAgent travels with you. The dreamed memory specialist exposes the same MCP/HTTP interface to any frontier model.
-4. **The roadmap derisks itself.** V1 is a viability proof on a tiny model. V2 ships that tiny model as a real product. V3 — applying the same technique to frontier-scale open models — is only worth the compute if V2 already pays its way.
+1. **Privacy is structural.** Memories are consolidated locally on Apple Silicon. They never traverse a third-party API to become parametric. EU AI Act, HIPAA, financial: all viable.
+2. **Reasoning, not retrieval.** A vector index returns the closest chunks. A dreamed model *understands the connections* — because it saw all memories together during training. See the [cross-memory reasoning benchmark](benchmarks/cross_memory_reasoning.py).
+3. **Cross-agent memory.** Switch your daily-driver from Claude to GPT to local Llama whenever. Your DreamAgent travels with you and exposes the same MCP backend.
+4. **The roadmap derisks itself.** V1 is a viability proof on a 1B model. V2 ships that model as a real product. V3 — applying the technique to frontier-scale — only runs if V2 proves itself first.
 
 ---
 
 ## Quickstart
 
 ```bash
-# Clone + install
 git clone https://github.com/mrdulasolutions/dreamagent.git
 cd dreamagent
 uv sync
 
-# 1. Extract memories from raw text using a frontier LLM
+# Extract memories from raw text via a frontier LLM
 export ANTHROPIC_API_KEY=sk-ant-...
 uv run dreamagent extract \
     --from my-chat.txt \
     --backend anthropic \
     --output memories.jsonl
 
-# 2. Inspect what was extracted
-uv run dreamagent ingest memories.jsonl
-
-# 3. Run the nightly dream pipeline (downloads ~700MB on first run)
+# Run the nightly dream pipeline
 uv run dreamagent dream \
     --source memories.jsonl \
     --validation-tier \
@@ -75,57 +95,48 @@ uv run dreamagent dream \
     --iters 90 --num-layers 4 --learning-rate 3e-5 \
     --anchor-ratio 0.30 --max-anchors 60
 
-# 4. (Optional) Schedule it to run nightly
-uv run dreamagent install-cron --dry-run    # preview
-uv run dreamagent install-cron              # actually install (macOS launchd)
+# Schedule it nightly (macOS launchd / Linux cron)
+uv run dreamagent install-cron
 ```
 
-That's the entire loop. After the first successful run, `runs/snapshots/live` points at your first dreamed adapter. You can hot-swap it into any MLX-LM serve, Ollama, or any tool that loads PEFT adapters.
+After the first successful run, `runs/snapshots/live/adapter/` holds your first dreamed adapter. See [`examples/01-quickstart`](examples/01-quickstart/) for a 5-minute end-to-end recipe; [`examples/`](examples/) has six more.
 
 ---
 
-## What Just Happened
+## V1 Viability — Reproduced, Not Just Claimed
 
-When you run `dreamagent dream`, you get a single nightly cron unit that:
+Pass 1 of the verification protocol completed on Llama 3.2 1B Instruct after 16 documented tuning runs. The locked recipe is in [`docs/tuning/llama-3.2-1b-instruct-4bit.md`](docs/tuning/llama-3.2-1b-instruct-4bit.md).
 
-| # | Stage | What it does |
+| Metric | Result | Notes |
 |---|---|---|
-| 1 | **ingest** | Reads `MemoryItem`s from any connector (JSONL, mem0, supermemory, Claude memory, OpenClaw, Hermes) |
-| 2 | **compose** | Converts each memory into 2-4 training examples + 1 held-out eval probe. Templates per kind (fact, preference, procedure, event, correction). |
-| 3 | **rehearsal mix** | Blends today + prior-night replay + a fixed "general capability anchor" set so the model doesn't forget that it's an assistant or that 2+2=4. |
-| 4 | **train** | LoRA fine-tune via MLX-LM (local Mac) or Unsloth (cloud, same script). Subprocess wrapper, full metadata.json with lineage. |
-| 5 | **eval** | (a) Personal recall: does the trained model know the new memories? (b) General capability: did we break the base model? |
-| 6 | **promote** | A 4-decision gate: PROMOTE, PROMOTE_WITH_WARNING, REJECT, or REJECT (low recall). Bad runs land in `rejected/` and `live` is preserved. |
-| 7 | **snapshot** | Adapter + all evals + metadata + gate decision saved as a versioned artifact. One-command rollback to any prior night. |
+| Base model | `mlx-community/Llama-3.2-1B-Instruct-4bit` | 1B params, 4-bit quantized |
+| Memories trained | 50 fixtures (all 5 `kind` values) | covers fact / preference / procedure / event / correction |
+| Training time | ~25 seconds | Apple Silicon M-series |
+| Personal recall (held-out probes) | **46%** | vs **0%** baseline |
+| General capability (base) | 93% (28/30) | shipped general-eval set |
+| General capability (adapter) | 90% (27/30) | **3.3pp regression — clean PROMOTE** |
+| Eval gate decision | ✅ **PROMOTE** | no warning |
+| End-to-end reproducibility | ✅ | one `dreamagent dream` invocation from a fresh clone |
 
-Every emitted artifact is human-readable. Every model response can be traced back to the adapter that taught it, to the training example that taught the adapter, to the memory that became the training example. No black box.
-
----
-
-## The Methodology
-
-DreamAgent introduces and names a specific technique: **nightly LoRA consolidation of structured agent memories into parametric weights with eval-gated promotion and per-night adapter snapshots**.
-
-See [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) for the full description, prior art, and the open problems we're still chasing.
-
-> If you build on this work — academic, commercial, or otherwise — attribution to Mr Dula Solutions is required per [`NOTICE`](NOTICE). See [Licensing](#licensing).
+The path to this clean PROMOTE went through one major model switch (Qwen 3 0.6B abandoned due to chain-of-thought conflict) and 15 prior runs that landed at PROMOTE_WITH_WARNING or REJECT. The [tuning log](docs/tuning/) documents every step.
 
 ---
 
-## Viability — V1 Proof
+## Benchmarks
 
-Pass 1 of the V1 verification protocol has been completed and is reproducible from the repo state alone. The locked recipe lives in [`docs/tuning/llama-3.2-1b-instruct-4bit.md`](docs/tuning/llama-3.2-1b-instruct-4bit.md).
+Reproducible validation harness in [`benchmarks/`](benchmarks/). Each benchmark is a single `python -m benchmarks.<name> --snapshot ...` invocation that writes a JSON report.
 
-| Metric | Result |
-|---|---|
-| Base model | mlx-community/Llama-3.2-1B-Instruct-4bit |
-| Memories trained | 50 fixtures across all 5 kinds |
-| Training time | ~25s on Mac M-series |
-| Personal recall on held-out probes | **46%** (vs 0% baseline) |
-| General capability preservation | 90% (vs 93% base — **3.3pp regression**) |
-| Eval gate decision | **PROMOTE** ✓ |
+| Benchmark | Status | What it measures |
+|---|---|---|
+| [`personal_recall`](benchmarks/personal_recall.py) | ✅ runnable | Adapter recalls training memories from weights |
+| [`general_capability`](benchmarks/general_capability.py) | ✅ runnable | Catastrophic forgetting on the anchor probe set |
+| [`cross_memory_reasoning`](benchmarks/cross_memory_reasoning.py) | ✅ runnable | The parametric advantage: probes requiring 2-3 memories synthesized |
+| [`query_latency`](benchmarks/query_latency.py) | ✅ runnable | p50/p95/p99 query latency on the dreamed model |
+| [`identity_drift`](benchmarks/identity_drift.py) | ✅ runnable | Persona preservation across nights |
+| `locomo_compat` | 🚧 V2 target | DreamAgent on the standard agent-memory benchmark |
+| `vs_baselines/*` | 🚧 V2 target | Same memory set through mem0/Letta — head-to-head on the axes that matter |
 
-16 tuning runs produced this clean PROMOTE. The full sweep is documented in [`docs/tuning/`](docs/tuning/) with hypotheses, falsified theories, and the 6 transferable lessons we extracted.
+We don't publish LoCoMo numbers we haven't measured. We don't cherry-pick. See [ADR-007](docs/adr/007-parametric-vs-retrieval-positioning.md) for the positioning rationale.
 
 ---
 
@@ -133,101 +144,86 @@ Pass 1 of the V1 verification protocol has been completed and is reproducible fr
 
 ```
 src/dreamagent/
-    schema.py       — MemoryItem & MemoryBatch (pydantic v2)
+    schema.py       — MemoryItem & MemoryBatch (pydantic v2 strict)
     ingest/         — connectors emitting MemoryItems (JSONL / Fixture / Mem0 / …)
-    extract/        — frontier-LLM memory extraction (Anthropic / OpenAI / Ollama)
+    extract/        — frontier-LLM extraction (Anthropic / OpenAI / Ollama)
     compose/        — templates · examples · rehearsal mix · anchors
     train/          — MLX-LM LoRA wrapper · config · lineage metadata
     eval/           — substring-match scoring · personal + general probes
-    promote/        — eval gate (4-decision matrix) · snapshot · rollback
-    merge/          — weekly mergekit consolidation (Phase 3, scaffolded)
-    serve/          — MLX-LM / Ollama hot-swap (Phase 3, scaffolded)
+    promote/        — 4-decision eval gate · snapshot · rollback
+    merge/          — weekly mergekit consolidation (V2, scaffolded)
+    serve/          — MLX-LM / Ollama / MCP hot-swap (V2, scaffolded)
     cli.py          — typer entry point
 ```
 
-For a deeper walk through each subsystem and its interfaces, see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full module walkthrough; [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) for the technique definition; [`docs/adr/`](docs/adr/) for the 7 ADRs covering major decisions.
 
 ---
 
 ## Frontier Model Integration
 
-The most accuracy-critical part of DreamAgent is the conversion from raw text to validated `MemoryItem`s. This is where mistakes propagate downstream into the trained weights — once a hallucinated fact is in the adapter, you have to dream it out again.
-
-We solve this with `dreamagent extract`, which calls a frontier LLM with a precision-engineered system prompt (see [`src/dreamagent/extract/prompt.py`](src/dreamagent/extract/prompt.py)) that:
+`dreamagent extract` converts arbitrary text into validated `MemoryItem`s via a precision-engineered system prompt that:
 
 - Enforces a strict 5-kind taxonomy with discriminating examples
 - Forbids fabrication (lower confidence over guessing)
-- Skips ephemeral content ("I said hi" is not a memory)
+- Skips ephemeral content
 - Refuses to extract sensitive data (passwords, credentials, SSNs)
-- Outputs a JSON array that's validated against the pydantic schema record-by-record
-- Auto-rejects records with malformed shape, with structured rejection reasons
+- Outputs a JSON array validated record-by-record against the pydantic schema
 
-Three backends ship today:
-
-| Backend | Default model | Install | When to use |
-|---|---|---|---|
-| `anthropic` | `claude-sonnet-4-6` | `uv sync --extra anthropic` | Best extraction quality |
-| `openai` | `gpt-4o-2024-11-20` | `uv sync --extra openai` | Production-grade alternate |
-| `ollama` | `llama3.2:3b` | `uv sync --extra ollama` | Fully local, privacy-strict |
-
-You bring your own API key — DreamAgent is byok-only by design.
+Three backends ship as optional dependencies (`dreamagent[anthropic|openai|ollama]`). Bring your own API key — DreamAgent is BYOK by design.
 
 ---
 
 ## Roadmap
 
-DreamAgent ships in three versions, each gated on evidence from the previous.
-
-| Version | Goal | Status |
+| Version | Status | Goal |
 |---|---|---|
-| **V1 — Viability Proof** | Demonstrate consolidation works on a small model with eval-gated safety | ✅ Pass 1 complete |
-| **V2 — Memory Specialist** | Expose the dreamed model as an MCP / HTTP / library memory backend any larger agent can call | 🔜 in design |
-| **V3 — Frontier Direct** | Apply the same recipe directly to 70B+ models on rented GPUs | ⏸ blocked on V1+V2 evidence |
+| **V1 — Viability Proof** | ✅ Pass 1 done | Demonstrate consolidation works on a small model with eval-gated safety |
+| **V2 — Memory Specialist** | 🔬 in design | MCP / HTTP / library backend any agent can query — the actual product |
+| **V3 — Frontier Direct** | ⏸ conditional | Apply the recipe to 70B+ models on cloud GPUs |
 
-V2 is the actual product. V3 is optional — if V2 satisfies the use case, the small dreamed model IS the answer.
-
----
-
-## Tests
-
-```bash
-uv run pytest -q          # 114 tests, full suite ~3s
-uv run ruff check src tests
-```
-
-Tests cover schema validation, all 3 connectors, compose stage (examples + anchors + mix), train metadata, eval scoring + reporting, promote gate decisions, snapshot/rollback machinery, and the extraction pipeline. The actual LoRA training and live model inference are exercised by `dreamagent dream` end-to-end against fixtures.
+Full version targets and metrics in [`ROADMAP.md`](ROADMAP.md).
 
 ---
 
-## Licensing
+## Documentation
 
-This repository is licensed under the **Apache License, Version 2.0**. See [`LICENSE`](LICENSE).
+- [`README.md`](README.md) ← you are here
+- [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) — what DreamAgent is, formally
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — module-by-module walkthrough
+- [`docs/comparison/`](docs/comparison/) — head-to-heads vs mem0 / Letta / Supermemory / Zep / giant context
+- [`docs/tuning/`](docs/tuning/) — per-model tuning playbook with locked recipes
+- [`docs/adr/`](docs/adr/) — Architecture Decision Records (7)
+- [`ROADMAP.md`](ROADMAP.md) — public roadmap with concrete targets
+- [`FAQ.md`](FAQ.md) — common questions, including "why not just mem0?"
+- [`SECURITY.md`](SECURITY.md) — threat model + disclosure
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — how to land changes
+- [`CHANGELOG.md`](CHANGELOG.md) — version history
+- [`examples/`](examples/) — seven runnable cookbook recipes
 
-The DreamAgent methodology, prompts, fixture data, tuning playbook, and architectural patterns published in this repository were originated by **Mr Dula Solutions** on **2026-05-26**. Per [`NOTICE`](NOTICE), redistribution and derivative works **must** include attribution:
+---
+
+## Licensing & Attribution
+
+Licensed under the **Apache License, Version 2.0**. See [`LICENSE`](LICENSE).
+
+The DreamAgent methodology, prompts, fixture data, tuning playbook, and architectural patterns published in this repository were **originated by Mr Dula Solutions** on **2026-05-26**. Per [`NOTICE`](NOTICE), redistribution and derivative works **must** include attribution:
 
 > "Built on the DreamAgent methodology by Mr Dula Solutions
 > (https://github.com/mrdulasolutions/dreamagent)"
 
-We can't physically stop someone from using the methodology without credit. This repository, its commit history, and [`CITATION.cff`](CITATION.cff) exist so we can definitively prove the technique originated here.
+If you publish academic work using DreamAgent, cite via [`CITATION.cff`](CITATION.cff).
 
-If you publish academic work using DreamAgent, please use the citation in [`CITATION.cff`](CITATION.cff).
-
----
-
-## Contributing
-
-PRs welcome. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the workflow, code style, test bar, and how to add new connectors or backends.
-
-For security issues, see [`SECURITY.md`](SECURITY.md).
+We can't physically stop unauthorized use of the methodology. This repository, its commit history (rooted on the publication date), the dated `NOTICE`, and `CITATION.cff` together establish indisputable provenance — see [ADR-001](docs/adr/001-apache-2.0-with-notice-attribution.md).
 
 ---
 
-## Prior Art and Inspiration
+## Prior Art
 
-DreamAgent stands on substantial prior work — particularly memory consolidation in agentic systems (mem0, Letta, OpenClaw Dreaming, Anthropic's Claude Dreaming) and continual learning research (CL-LoRA, SuRe, FOREVER, SleepGate, Memento). The distinction is that none of those systems push memories into model weights — they all stop at curated text consolidation. DreamAgent closes that gap.
+DreamAgent stands on substantial prior work — memory consolidation in agentic systems ([mem0](https://github.com/mem0ai/mem0), [Letta / MemGPT](https://github.com/letta-ai/letta), [OpenClaw Dreaming](https://dev.to/czmilo/openclaw-dreaming-guide-2026-background-memory-consolidation-for-ai-agents-585e), [Anthropic's Claude Dreaming](https://letsdatascience.com/blog/anthropic-dreaming-claude-managed-agents-self-improving-may-6)) and continual learning research ([CL-LoRA](https://openaccess.thecvf.com/content/CVPR2025/papers/He_CL-LoRA_Continual_Low-Rank_Adaptation_for_Rehearsal-Free_Class-Incremental_Learning_CVPR_2025_paper.pdf), [SuRe](https://zylos.ai/research/2026-04-09-continual-learning-catastrophic-forgetting-ai-agents), [SleepGate](https://arxiv.org/abs/2603.14517), [Memento](https://arxiv.org/abs/2508.16153)). The distinguishing contribution is the **end-to-end loop**: agent memories → nightly LoRA → eval-gated promotion → memory specialist backend.
 
-Full references and a tour of the closest neighbors live in [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md).
+Full references in [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md#prior-art-and-where-dreamagent-differs).
 
 ---
 
-<sub>Made by [Mr Dula Solutions](https://github.com/mrdulasolutions). If this changes how you think about agent memory, [tell us](https://github.com/mrdulasolutions/dreamagent/issues).</sub>
+<sub>Made by [Mr Dula Solutions](https://github.com/mrdulasolutions). If this changes how you think about agent memory, [open an issue and tell us](https://github.com/mrdulasolutions/dreamagent/issues).</sub>
