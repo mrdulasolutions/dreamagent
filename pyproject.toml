@@ -45,6 +45,9 @@ openai = ["openai>=1.50"]
 ollama = ["ollama>=0.3"]
 all-extractors = ["anthropic>=0.40", "openai>=1.50", "ollama>=0.3"]
 mcp = ["mcp>=1.4"]
+# Used only by `benchmarks/baselines/retrieval.py` for the vector-retrieval
+# control in vs-baselines benchmarks. Heavyweight (pulls torch). Optional.
+retrieval-baseline = ["sentence-transformers>=3.0", "numpy>=1.26"]
 dev = [
     "pytest>=8.3",
     "pytest-cov>=6.0",

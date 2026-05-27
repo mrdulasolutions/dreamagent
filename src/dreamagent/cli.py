@@ -378,6 +378,12 @@ def rollback(
 
 @app.command()
 def serve(
+    transport: str = typer.Option(
+        "stdio",
+        help="MCP transport: 'stdio' (default, for host-launched servers) or 'http'.",
+    ),
+    host: str = typer.Option("127.0.0.1", help="HTTP host (only used when --transport http)."),
+    port: int = typer.Option(8765, help="HTTP port (only used when --transport http)."),
     base_model: str | None = typer.Option(
         None,
         help=("Base model. Overrides $DREAMAGENT_BASE_MODEL. "
@@ -393,20 +399,22 @@ def serve(
         help="Max tokens per query response. Overrides $DREAMAGENT_MAX_TOKENS.",
     ),
 ) -> None:
-    """Start the MCP server (V2.0 alpha) exposing the dreamed model as a
-    memory backend over stdio.
+    """Start the MCP server (V2.0+) exposing the dreamed model as a
+    memory backend.
 
-    Any MCP-capable client (Claude Code, Cursor, Hermes, etc.) can install
-    DreamAgent as an MCP server via their `mcpServers` config and gain a
-    `query_memory` tool that answers from the user's dreamed weights.
+    Two transports:
+      - stdio (default): for host-launched setups like Claude Code's
+        mcpServers config
+      - http: a streamable-http server you can point multiple clients at
 
-    Configuration: precedence is CLI flag > env var > default. See
-    `src/dreamagent/serve/mcp.py` for the env var names.
+    Any MCP-capable client gains `query_memory(question, concise=False)`
+    and `query_memory_with_lineage(question)` tools. The `concise` flag
+    on query_memory requests a 1-sentence response for ~3x lower latency.
 
     Examples:
         dreamagent serve
+        dreamagent serve --transport http --port 9000
         DREAMAGENT_SNAPSHOTS_DIR=~/runs/snapshots dreamagent serve
-        dreamagent serve --snapshots-dir ~/runs/snapshots
     """
     import os
 
@@ -417,13 +425,21 @@ def serve(
     if max_tokens is not None:
         os.environ["DREAMAGENT_MAX_TOKENS"] = str(max_tokens)
 
+    if transport not in ("stdio", "http"):
+        console.print(f"[red]unknown transport {transport!r}; choose 'stdio' or 'http'[/red]")
+        raise typer.Exit(code=2)
+
     try:
-        from dreamagent.serve import run_stdio
+        from dreamagent.serve import run_http, run_stdio
     except RuntimeError as e:
         console.print(f"[red]{e}[/red]")
         raise typer.Exit(code=2) from None
 
-    run_stdio()
+    if transport == "stdio":
+        run_stdio()
+    else:
+        console.print(f"starting http server on {host}:{port}")
+        run_http(host=host, port=port)
 
 
 @app.command()
