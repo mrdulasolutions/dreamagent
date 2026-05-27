@@ -195,6 +195,7 @@ Concrete metric targets per version in [`ROADMAP.md`](ROADMAP.md).
 
 If you're a developer / researcher / engineer and want the depth:
 
+- **The paper** — [`docs/PAPER.md`](docs/PAPER.md). Academic write-up of MORPHEUS with experimental methodology, results, limitations (pre-emptively enumerated), reproducibility commands, and a list of methodology critiques we'd accept as valid falsification.
 - **What this actually is, formally:** [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) — the **MORPHEUS** methodology (Memory Overnight Re-parameterization, Promotion via Held-out Eval, Update Snapshots). DreamAgent is the reference implementation.
 - **How the code is structured:** [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — module-by-module walkthrough
 - **Why every major design decision was made:** [`docs/adr/`](docs/adr/) — 8 Architecture Decision Records
