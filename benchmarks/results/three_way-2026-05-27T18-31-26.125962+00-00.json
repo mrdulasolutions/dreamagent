@@ -1,0 +1,63 @@
+{
+  "name": "three_way",
+  "snapshot": "runs/snapshots/live",
+  "timestamp_utc": "2026-05-27T18:31:26.125962+00:00",
+  "metrics": {
+    "memories_source": "fixture:v1_baseline",
+    "snapshot": "runs/snapshots/live",
+    "base_model": "mlx-community/Meta-Llama-3.1-8B-Instruct-4bit",
+    "top_k": 5,
+    "personal_recall": {
+      "dreamagent": {
+        "n": 48,
+        "passed": 36,
+        "pass_rate": 0.75
+      },
+      "retrieval": {
+        "n": 48,
+        "passed": 33,
+        "pass_rate": 0.6875
+      },
+      "composed": {
+        "n": 48,
+        "passed": 31,
+        "pass_rate": 0.6458333333333334
+      }
+    },
+    "cross_memory_reasoning": {
+      "dreamagent": {
+        "n": 10,
+        "passed": 9,
+        "pass_rate": 0.9
+      },
+      "retrieval": {
+        "n": 10,
+        "passed": 9,
+        "pass_rate": 0.9
+      },
+      "composed": {
+        "n": 10,
+        "passed": 9,
+        "pass_rate": 0.9
+      }
+    },
+    "adversarial_retrieval": {
+      "dreamagent": {
+        "n": 15,
+        "passed": 12,
+        "pass_rate": 0.8
+      },
+      "retrieval": {
+        "n": 15,
+        "passed": 14,
+        "pass_rate": 0.9333333333333333
+      },
+      "composed": {
+        "n": 15,
+        "passed": 13,
+        "pass_rate": 0.8666666666666667
+      }
+    }
+  },
+  "detail": null
+}

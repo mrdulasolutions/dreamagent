@@ -14,6 +14,7 @@ exact commands to run.
 | [05-rollback-drill](./05-rollback-drill/) | Intentionally trigger a REJECT and verify the rollback story. |
 | [06-benchmark-suite](./06-benchmark-suite/) | Run the published benchmarks against your own snapshot. |
 | [07-mcp-memory-backend](./07-mcp-memory-backend/) | (V2.0 live) Expose the dreamed model as an MCP server. Detailed config + Claude Code/Cursor setup. |
+| [08-mem0-plus-dreamagent](./08-mem0-plus-dreamagent/) | (V2.2) The composition recipe. Run mem0 + DreamAgent in parallel as two MCP servers; the agent reconciles. Born from V2.1's parity finding. |
 
 Run any example from its directory:
 
