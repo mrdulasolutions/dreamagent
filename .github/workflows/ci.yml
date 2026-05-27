@@ -76,12 +76,13 @@ jobs:
       - uses: astral-sh/setup-uv@v3
         with:
           enable-cache: true
-      - name: Install
-        run: |
-          uv pip install --system pydantic mypy types-setuptools
-      - name: Run mypy
+      - name: Set up Python
+        run: uv python install 3.12
+      - name: Run mypy in an ephemeral venv
         # mypy is informational for now — won't fail CI yet, but surfaces issues
-        run: mypy --config-file mypy.ini src/dreamagent || true
+        run: |
+          uv run --no-project --with pydantic --with mypy \
+            mypy --config-file mypy.ini src/dreamagent || true
 
   validate-schema:
     name: Schema + Fixtures Consistency
@@ -91,13 +92,13 @@ jobs:
       - uses: astral-sh/setup-uv@v3
         with:
           enable-cache: true
-      - name: Install
-        run: |
-          uv pip install --system pydantic
+      - name: Set up Python
+        run: uv python install 3.12
       - name: Validate every fixture parses under MemoryItem
+        # uv run --with creates an ephemeral env; works on PEP 668 systems
+        # where --system pip installs are blocked.
         run: |
-          python -c "
-          import json
+          uv run --no-project --with pydantic python -c "
           from pathlib import Path
           from pydantic import ValidationError
           import sys
