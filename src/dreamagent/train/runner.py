@@ -215,11 +215,32 @@ def train_adapter(
     When `config.use_oplora=True`, dispatches to the in-process OPLoRA
     runner (Path A · Week 1). All other config remains the same.
     """
+    if config.use_oplora and config.use_smft:
+        raise ValueError(
+            "use_oplora and use_smft cannot both be True — pick one. "
+            "They're independent capability-improvement candidates, and "
+            "stacking them confounds attribution of any effect."
+        )
+
     if config.use_oplora:
         # Local import to avoid loading mlx_lm at module import time.
         from dreamagent.train.oplora_runner import train_adapter_oplora
 
         return train_adapter_oplora(
+            mix=mix,
+            config=config,
+            run_dir=run_dir,
+            log_stream=log_stream,
+            tag=tag,
+            notes=notes,
+            invocation=invocation,
+            resume_adapter_file=resume_adapter_file,
+        )
+
+    if config.use_smft:
+        from dreamagent.train.smft_runner import train_adapter_smft
+
+        return train_adapter_smft(
             mix=mix,
             config=config,
             run_dir=run_dir,

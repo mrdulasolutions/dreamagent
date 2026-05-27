@@ -47,7 +47,16 @@ class TrainConfig:
     use_oplora: bool = False
     oplora_k_singular: int = 32
 
-    # ── LoRA shape knobs surfaced for tuning (also used by OPLoRA) ──
+    # ── SMFT — Sparse Memory Finetuning (Path A · Week 2) ──
+    # Apply per-tensor top-k% gradient sparsification before each optimizer
+    # step. Hypothesis: many LoRA parameter updates interfere with prior
+    # knowledge without being necessary for the new memory. SMFT zeros out
+    # the bottom (1 - smft_sparsity) fraction of gradient entries by
+    # absolute magnitude.
+    use_smft: bool = False
+    smft_sparsity: float = 0.10  # keep top 10% by |grad|
+
+    # ── LoRA shape knobs surfaced for tuning (also used by OPLoRA, SMFT) ──
     lora_rank: int = 8
     lora_scale: float = 20.0
     lora_dropout: float = 0.0

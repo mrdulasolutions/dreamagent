@@ -1,0 +1,270 @@
+"""In-process Sparse Memory Finetuning training runner.
+
+Like `oplora_runner`, SMFT can't go through the mlx_lm CLI subprocess
+because we need to wrap the optimizer with our gradient sparsifier. So
+we replicate mlx_lm.lora.train_model in-process, using standard
+`linear_to_lora_layers` (no OPLoRA projections) but with the
+SparseMemoryOptimizer wrapping the base optimizer.
+
+The TrainResult interface matches `runner.train_adapter`.
+"""
+
+from __future__ import annotations
+
+import contextlib
+import json
+import sys
+import types as _types_module
+from datetime import UTC, datetime
+from pathlib import Path
+
+import mlx.core as mx
+import mlx.optimizers as optim
+
+from dreamagent.compose.mix import RehearsalMix
+from dreamagent.train.config import TrainConfig
+from dreamagent.train.smft import SparseMemoryOptimizer
+from dreamagent.train.runner import (
+    ADAPTER_FILENAME,
+    METADATA_FILENAME,
+    TrainError,
+    TrainResult,
+    _split_train_valid,
+    _versions,
+    _write_jsonl,
+)
+
+
+def _dataset_args(data_dir: Path, mask_prompt: bool) -> _types_module.SimpleNamespace:
+    return _types_module.SimpleNamespace(
+        data=str(data_dir),
+        train=True,
+        test=False,
+        hf_dataset=False,
+        mask_prompt=mask_prompt,
+    )
+
+
+def _build_adapter_config(config: TrainConfig, adapter_dir: Path) -> dict:
+    """SMFT adapter_config — superset of mlx_lm's lora adapter_config, adds
+    use_smft + smft_sparsity so the loader can reproduce the training
+    config if needed (eval-time loading uses the unmodified LoRA path)."""
+    return {
+        "model": config.base_model,
+        "fine_tune_type": "lora",
+        # SMFT-specific:
+        "use_smft": True,
+        "smft_sparsity": config.smft_sparsity,
+        # Standard lora_parameters block:
+        "num_layers": config.num_layers,
+        "lora_parameters": {
+            "rank": config.lora_rank,
+            "dropout": config.lora_dropout,
+            "scale": config.lora_scale,
+        },
+        # Bookkeeping:
+        "iters": config.iters,
+        "batch_size": config.batch_size,
+        "learning_rate": config.learning_rate,
+        "max_seq_length": config.max_seq_length,
+        "optimizer": config.optimizer,
+        "seed": config.seed,
+        "grad_accumulation_steps": config.grad_accumulation_steps,
+        "mask_prompt": config.mask_prompt,
+        "adapter_path": str(adapter_dir),
+    }
+
+
+def _select_base_optimizer(name: str, lr: float):
+    name = name.lower()
+    if name == "adam":
+        return optim.Adam(learning_rate=lr)
+    if name == "adamw":
+        return optim.AdamW(learning_rate=lr)
+    if name == "sgd":
+        return optim.SGD(learning_rate=lr)
+    raise ValueError(f"Unsupported base optimizer for SMFT: {name}")
+
+
+def train_adapter_smft(
+    mix: RehearsalMix,
+    config: TrainConfig,
+    run_dir: Path,
+    *,
+    log_stream=None,
+    tag: str | None = None,
+    notes: str | None = None,
+    invocation: list[str] | None = None,
+    resume_adapter_file: Path | None = None,
+) -> TrainResult:
+    """Train a LoRA adapter with sparse-gradient masking applied each step.
+
+    Same input/output contract as `runner.train_adapter`.
+    """
+    if not mix.examples:
+        raise ValueError("cannot train on empty mix")
+    if not config.use_smft:
+        raise ValueError(
+            "train_adapter_smft called with use_smft=False — "
+            "use dreamagent.train.runner.train_adapter instead"
+        )
+
+    from mlx_lm.tuner.datasets import CacheDataset, load_dataset
+    from mlx_lm.tuner.trainer import TrainingArgs, train as run_train
+    from mlx_lm.tuner.utils import linear_to_lora_layers, print_trainable_parameters
+    from mlx_lm.utils import load
+
+    run_dir = Path(run_dir)
+    data_dir = run_dir / "data"
+    adapter_dir = run_dir / "adapter"
+    data_dir.mkdir(parents=True, exist_ok=True)
+    adapter_dir.mkdir(parents=True, exist_ok=True)
+
+    train_examples, valid_examples = _split_train_valid(
+        mix.examples, config.val_fraction, config.seed
+    )
+    _write_jsonl(train_examples, data_dir / "train.jsonl")
+    _write_jsonl(valid_examples, data_dir / "valid.jsonl")
+
+    started_at = datetime.now(UTC)
+    sink = log_stream if log_stream is not None else sys.stdout
+    ctx = contextlib.redirect_stdout(sink) if log_stream is not None else contextlib.nullcontext()
+
+    with ctx:
+        mx.random.seed(config.seed)
+
+        print(f"[smft] Loading base model: {config.base_model}")
+        model, tokenizer = load(
+            config.base_model, tokenizer_config={"trust_remote_code": True}
+        )
+
+        print(f"[smft] Loading datasets from {data_dir}")
+        train_set, valid_set, _ = load_dataset(
+            _dataset_args(data_dir, config.mask_prompt), tokenizer
+        )
+
+        adapter_config_dict = _build_adapter_config(config, adapter_dir)
+        (adapter_dir / "adapter_config.json").write_text(
+            json.dumps(adapter_config_dict, indent=2) + "\n", encoding="utf-8"
+        )
+
+        if config.num_layers > len(model.layers):
+            raise ValueError(
+                f"Requested to train {config.num_layers} layers but model "
+                f"only has {len(model.layers)} layers."
+            )
+
+        print("[smft] Freezing base model")
+        model.freeze()
+
+        print(
+            f"[smft] Converting last {config.num_layers} layers to LoRA "
+            f"(rank={config.lora_rank})"
+        )
+        linear_to_lora_layers(
+            model,
+            num_layers=config.num_layers,
+            config={
+                "rank": config.lora_rank,
+                "scale": config.lora_scale,
+                "dropout": config.lora_dropout,
+            },
+            use_dora=False,
+        )
+
+        if resume_adapter_file is not None:
+            print(f"[smft] Resuming from {resume_adapter_file}")
+            model.load_weights(str(resume_adapter_file), strict=False)
+
+        print_trainable_parameters(model)
+
+        adapter_file = adapter_dir / ADAPTER_FILENAME
+        training_args = TrainingArgs(
+            batch_size=config.batch_size,
+            iters=config.iters,
+            val_batches=config.val_batches,
+            steps_per_report=config.steps_per_report,
+            steps_per_eval=config.steps_per_eval,
+            steps_per_save=max(1, config.iters),
+            max_seq_length=config.max_seq_length,
+            adapter_file=str(adapter_file),
+            grad_checkpoint=False,
+            grad_accumulation_steps=config.grad_accumulation_steps,
+        )
+
+        base_opt = _select_base_optimizer(config.optimizer, config.learning_rate)
+        smft_opt = SparseMemoryOptimizer(
+            base_opt, sparsity_fraction=config.smft_sparsity
+        )
+        print(
+            f"[smft] Wrapping {config.optimizer} with SparseMemoryOptimizer "
+            f"(sparsity_fraction={config.smft_sparsity}, "
+            f"keeping top {config.smft_sparsity * 100:.1f}% of gradient by magnitude)"
+        )
+
+        print("[smft] Starting training loop")
+        try:
+            run_train(
+                model=model,
+                args=training_args,
+                optimizer=smft_opt,
+                train_dataset=CacheDataset(train_set),
+                val_dataset=CacheDataset(valid_set),
+            )
+        except Exception as e:
+            raise TrainError(f"SMFT training failed: {e}") from e
+
+    completed_at = datetime.now(UTC)
+
+    adapter_path = adapter_dir / ADAPTER_FILENAME
+    if not adapter_path.exists():
+        raise TrainError(
+            f"SMFT training completed but adapter not found at {adapter_path}"
+        )
+
+    metadata_path = run_dir / METADATA_FILENAME
+    metadata = {
+        "schema_version": "1.0",
+        "tag": tag,
+        "notes": notes,
+        "invocation": invocation,
+        "resumed_from": str(resume_adapter_file) if resume_adapter_file else None,
+        "started_at": started_at.isoformat(),
+        "completed_at": completed_at.isoformat(),
+        "duration_seconds": (completed_at - started_at).total_seconds(),
+        "config": {
+            "base_model": config.base_model,
+            "fine_tune_type": "smft",
+            "num_layers": config.num_layers,
+            "iters": config.iters,
+            "batch_size": config.batch_size,
+            "learning_rate": config.learning_rate,
+            "grad_accumulation_steps": config.grad_accumulation_steps,
+            "max_seq_length": config.max_seq_length,
+            "optimizer": config.optimizer,
+            "mask_prompt": config.mask_prompt,
+            "seed": config.seed,
+            "val_fraction": config.val_fraction,
+            "lora_rank": config.lora_rank,
+            "lora_scale": config.lora_scale,
+            "lora_dropout": config.lora_dropout,
+            "use_smft": True,
+            "smft_sparsity": config.smft_sparsity,
+        },
+        "mix_composition": dict(mix.composition),
+        "dataset_sizes": {
+            "train": len(train_examples),
+            "valid": len(valid_examples),
+            "total_examples_in_mix": len(mix.examples),
+        },
+        "source_memory_ids": sorted({ex.source_memory_id for ex in mix.examples}),
+        "versions": _versions(),
+    }
+    metadata_path.write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
+
+    return TrainResult(
+        run_dir=run_dir,
+        adapter_path=adapter_path,
+        metadata_path=metadata_path,
+        metadata=metadata,
+    )

@@ -204,6 +204,21 @@ def dream(
         32,
         help="k for OPLoRA: how many top singular vectors to project away (only used with --use-oplora).",
     ),
+    use_smft: bool = typer.Option(
+        False,
+        "--use-smft/--no-smft",
+        help=(
+            "Use Sparse Memory Finetuning (Path A · Week 2). Wraps the "
+            "optimizer with per-tensor top-k gradient sparsification — "
+            "only the top `smft_sparsity` fraction of gradient entries by "
+            "magnitude flow into each step's update. Hypothesis: reduces "
+            "interference with prior knowledge."
+        ),
+    ),
+    smft_sparsity: float = typer.Option(
+        0.10,
+        help="Fraction of gradient entries to KEEP per tensor (only used with --use-smft). Default 0.10 = top 10% by magnitude.",
+    ),
 ) -> None:
     """End-to-end nightly pipeline: ingest → compose → train → eval → promote."""
     from datetime import UTC, datetime
@@ -264,6 +279,8 @@ def dream(
         learning_rate=learning_rate,
         use_oplora=use_oplora,
         oplora_k_singular=oplora_k_singular,
+        use_smft=use_smft,
+        smft_sparsity=smft_sparsity,
     )
 
     console.rule("training")
