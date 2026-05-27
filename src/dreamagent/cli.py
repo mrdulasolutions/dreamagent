@@ -174,6 +174,13 @@ def dream(
         help="Use loose eval thresholds for 0.6B-class models.",
     ),
     eval_max_tokens: int = typer.Option(64, help="Max tokens per eval generation."),
+    resume_from_snapshot: Path | None = typer.Option(
+        None,
+        "--resume-from-snapshot",
+        help=("Path to a prior snapshot directory. The training will start "
+              "from that snapshot's adapter rather than the base model. "
+              "Used by `dreamagent drill` for chained multi-night runs."),
+    ),
     tag: str | None = typer.Option(
         None, help="Short label for this run, recorded in metadata.json and gate.json."
     ),
@@ -248,6 +255,17 @@ def dream(
         console.print(f"tag: [magenta]{tag}[/magenta]")
     if notes:
         console.print(f"notes: [dim]{notes}[/dim]")
+
+    resume_path: Path | None = None
+    if resume_from_snapshot is not None:
+        resume_path = (resume_from_snapshot / "adapter" / "adapters.safetensors").resolve()
+        if not resume_path.exists():
+            console.print(
+                f"[red]resume-from-snapshot path has no adapter:[/red] {resume_path}"
+            )
+            raise typer.Exit(code=2)
+        console.print(f"resuming from: [cyan]{resume_path}[/cyan]")
+
     train_result = train_adapter(
         mix,
         train_config,
@@ -256,6 +274,7 @@ def dream(
         tag=tag,
         notes=notes,
         invocation=list(sys.argv),
+        resume_adapter_file=resume_path,
     )
     console.print(
         f"[green]adapter saved[/green] at {train_result.adapter_path} "
@@ -355,6 +374,173 @@ def rollback(
 
     snap = rollback_to(output_dir / "snapshots", name)
     console.print(f"[green]rolled back to[/green] [cyan]{snap.name}[/cyan]")
+
+
+@app.command()
+def drill(
+    nights: int = typer.Option(7, help="Number of consecutive nights to simulate."),
+    source: str = typer.Option("fixture:v1_baseline", help="Memory source."),
+    base_model: str = typer.Option(
+        "mlx-community/Meta-Llama-3.1-8B-Instruct-4bit",
+        help="MLX model. Default: Llama 3.1 8B Instruct (production tier).",
+    ),
+    output_dir: Path = typer.Option(
+        Path("runs"), help="Project run directory; drill artifacts under drills/."
+    ),
+    iters: int = typer.Option(90, help="LoRA iters per night."),
+    num_layers: int = typer.Option(8, help="LoRA layers."),
+    learning_rate: float = typer.Option(3.0e-5, help="LoRA LR."),
+    anchor_ratio: float = typer.Option(0.30, help="Anchor share of nightly mix."),
+    max_anchors: int = typer.Option(60, help="Cap on anchors per night."),
+    validation_tier: bool = typer.Option(
+        True,
+        "--validation-tier/--production-tier",
+        help="Eval gate tier (loose for V1; tighten for V2).",
+    ),
+    eval_max_tokens: int = typer.Option(48, help="Max tokens per eval generation."),
+    stop_on_reject: bool = typer.Option(
+        True,
+        "--stop-on-reject/--continue-on-reject",
+        help="If a night REJECTs, halt (default) or continue from base model.",
+    ),
+    drill_name: str = typer.Option("drill", help="Tag prefix for this drill."),
+) -> None:
+    """Run N consecutive `dream` runs with chained training.
+
+    Each night after the first resumes from the prior night's adapter (if it
+    was promoted). Captures a trajectory of gate decisions + eval metrics so
+    we can see long-horizon stability (or breakdown) on a single model.
+
+    This is the canonical V1 Pass 2/3 stress test. Default: 7 nights on
+    Llama 3.1 8B Instruct with the locked-recipe hyperparameters.
+    """
+    import json
+    import subprocess
+    import sys
+    from datetime import UTC, datetime
+
+    from dreamagent.promote import current_live
+
+    output_dir = output_dir.resolve()
+    drill_dir = output_dir / "drills" / datetime.now(UTC).strftime("%Y-%m-%dT%H-%M-%SZ")
+    drill_dir.mkdir(parents=True, exist_ok=True)
+    snapshots_dir = output_dir / "snapshots"
+    drill_log = drill_dir / "trajectory.jsonl"
+
+    console.rule(f"[bold]drill[/bold] · {nights} nights · {base_model}")
+    console.print(f"artifacts: [cyan]{drill_dir}[/cyan]")
+
+    prior_snapshot = current_live(snapshots_dir)
+    trajectory: list[dict] = []
+
+    for night in range(1, nights + 1):
+        console.rule(f"[bold]night {night}/{nights}[/bold]")
+        tag = f"{drill_name}-n{night:02d}"
+
+        cmd = [
+            sys.executable, "-m", "dreamagent.cli", "dream",
+            "--source", source,
+            "--base-model", base_model,
+            "--output-dir", str(output_dir),
+            "--iters", str(iters),
+            "--num-layers", str(num_layers),
+            "--learning-rate", str(learning_rate),
+            "--anchor-ratio", str(anchor_ratio),
+            "--max-anchors", str(max_anchors),
+            "--eval-max-tokens", str(eval_max_tokens),
+            "--tag", tag,
+            "--notes", f"drill {drill_dir.name} night {night} of {nights}",
+        ]
+        if validation_tier:
+            cmd.append("--validation-tier")
+        else:
+            cmd.append("--production-tier")
+        if prior_snapshot is not None:
+            cmd.extend(["--resume-from-snapshot", str(prior_snapshot.dir)])
+
+        proc = subprocess.run(cmd, capture_output=False, text=True)
+        if proc.returncode != 0:
+            console.print(f"[red]night {night} failed (exit {proc.returncode})[/red]")
+            break
+
+        # Find the new live (if PROMOTEd) or the newest rejected
+        live_after = current_live(snapshots_dir)
+        promoted = (
+            live_after is not None
+            and (prior_snapshot is None or live_after.name != prior_snapshot.name)
+        )
+
+        if promoted:
+            snap_dir = live_after.dir
+            decision_dir_label = "promoted"
+        else:
+            rejected_root = snapshots_dir / "rejected"
+            rejected = sorted(rejected_root.iterdir()) if rejected_root.exists() else []
+            if not rejected:
+                console.print("[red]could not locate this night's snapshot[/red]")
+                break
+            snap_dir = rejected[-1]
+            decision_dir_label = "rejected"
+
+        gate = json.loads((snap_dir / "gate.json").read_text(encoding="utf-8"))
+        record = {
+            "night": night,
+            "tag": tag,
+            "snapshot": snap_dir.name,
+            "snapshot_dir_label": decision_dir_label,
+            "decision": gate["decision"],
+            "personal_pass_rate": gate["personal_pass_rate"],
+            "general_pass_rate_base": gate["general_pass_rate_base"],
+            "general_pass_rate_adapter": gate["general_pass_rate_adapter"],
+            "general_regression": gate["general_regression"],
+            "resumed_from": prior_snapshot.name if prior_snapshot else None,
+        }
+        trajectory.append(record)
+        with drill_log.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(record) + "\n")
+
+        decision = gate["decision"]
+        color = {"promote": "green", "promote_with_warning": "yellow", "reject": "red"}[decision]
+        console.print(
+            f"  → [{color}]{decision.upper()}[/{color}] · "
+            f"personal {gate['personal_pass_rate']:.0%} · "
+            f"Δgen {gate['general_regression']:+.1%}"
+        )
+
+        if decision == "reject":
+            if stop_on_reject:
+                console.print("[red]REJECT → halting drill (--stop-on-reject)[/red]")
+                break
+            prior_snapshot = None  # next night starts from base, breaking the chain
+        else:
+            prior_snapshot = live_after  # chain forward
+
+    # Final trajectory report
+    console.rule("[bold]drill trajectory[/bold]")
+    table = Table()
+    table.add_column("night", justify="right")
+    table.add_column("decision")
+    table.add_column("personal", justify="right")
+    table.add_column("Δ general", justify="right")
+    table.add_column("resumed_from", style="dim")
+    for r in trajectory:
+        color = {"promote": "green", "promote_with_warning": "yellow", "reject": "red"}[
+            r["decision"]
+        ]
+        table.add_row(
+            str(r["night"]),
+            f"[{color}]{r['decision']}[/{color}]",
+            f"{r['personal_pass_rate']:.0%}",
+            f"{r['general_regression']:+.1%}",
+            r["resumed_from"] or "(base)",
+        )
+    console.print(table)
+    promoted_count = sum(1 for r in trajectory if r["decision"] != "reject")
+    console.print(
+        f"\nsummary: [green]{promoted_count}[/green] promoted · "
+        f"[red]{len(trajectory) - promoted_count}[/red] rejected · "
+        f"trajectory log: [cyan]{drill_log}[/cyan]"
+    )
 
 
 @app.command()

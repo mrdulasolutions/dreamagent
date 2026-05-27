@@ -71,7 +71,11 @@ def _resolve_python() -> str:
 
 
 def _build_command(
-    python: str, data_dir: Path, adapter_dir: Path, config: TrainConfig
+    python: str,
+    data_dir: Path,
+    adapter_dir: Path,
+    config: TrainConfig,
+    resume_adapter_file: Path | None = None,
 ) -> list[str]:
     cmd = [
         python,
@@ -112,6 +116,8 @@ def _build_command(
     ]
     if config.mask_prompt:
         cmd.append("--mask-prompt")
+    if resume_adapter_file is not None:
+        cmd.extend(["--resume-adapter-file", str(resume_adapter_file)])
     return cmd
 
 
@@ -143,12 +149,14 @@ def _write_metadata(
     tag: str | None = None,
     notes: str | None = None,
     invocation: list[str] | None = None,
+    resume_adapter_file: Path | None = None,
 ) -> dict:
     metadata = {
         "schema_version": "1.0",
         "tag": tag,
         "notes": notes,
         "invocation": invocation,
+        "resumed_from": str(resume_adapter_file) if resume_adapter_file else None,
         "started_at": started_at.isoformat(),
         "completed_at": completed_at.isoformat(),
         "duration_seconds": (completed_at - started_at).total_seconds(),
@@ -188,6 +196,7 @@ def train_adapter(
     tag: str | None = None,
     notes: str | None = None,
     invocation: list[str] | None = None,
+    resume_adapter_file: Path | None = None,
 ) -> TrainResult:
     """Train a LoRA adapter on the given mix, writing outputs under run_dir.
 
@@ -219,7 +228,9 @@ def train_adapter(
     _write_jsonl(valid_examples, data_dir / "valid.jsonl")
 
     started_at = datetime.now(UTC)
-    cmd = _build_command(_resolve_python(), data_dir, adapter_dir, config)
+    cmd = _build_command(
+        _resolve_python(), data_dir, adapter_dir, config, resume_adapter_file
+    )
 
     stdout_target = log_stream if log_stream is not None else subprocess.PIPE
     completed = subprocess.run(
@@ -254,6 +265,7 @@ def train_adapter(
         tag=tag,
         notes=notes,
         invocation=invocation,
+        resume_adapter_file=resume_adapter_file,
     )
     return TrainResult(
         run_dir=run_dir,
