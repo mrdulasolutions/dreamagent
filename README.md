@@ -103,22 +103,45 @@ After the first successful run, `runs/snapshots/live/adapter/` holds your first 
 
 ---
 
-## V1 Viability — Reproduced, Not Just Claimed
+## V1 Viability — All Three Passes Complete
 
-Pass 1 of the verification protocol completed on Llama 3.2 1B Instruct after 16 documented tuning runs. The locked recipe is in [`docs/tuning/llama-3.2-1b-instruct-4bit.md`](docs/tuning/llama-3.2-1b-instruct-4bit.md).
+V1 of the MORPHEUS methodology has been validated at three escalating levels of rigor. All three are reproducible from a fresh clone.
 
-| Metric | Result | Notes |
-|---|---|---|
-| Base model | `mlx-community/Llama-3.2-1B-Instruct-4bit` | 1B params, 4-bit quantized |
-| Memories trained | 50 fixtures (all 5 `kind` values) | covers fact / preference / procedure / event / correction |
-| Training time | ~25 seconds | Apple Silicon M-series |
-| Personal recall (held-out probes) | **46%** | vs **0%** baseline |
-| General capability (base) | 93% (28/30) | shipped general-eval set |
-| General capability (adapter) | 90% (27/30) | **3.3pp regression — clean PROMOTE** |
-| Eval gate decision | ✅ **PROMOTE** | no warning |
-| End-to-end reproducibility | ✅ | one `dreamagent dream` invocation from a fresh clone |
+### Pass 1 — single-night validation tier (Llama 3.2 1B)
 
-The path to this clean PROMOTE went through one major model switch (Qwen 3 0.6B abandoned due to chain-of-thought conflict) and 15 prior runs that landed at PROMOTE_WITH_WARNING or REJECT. The [tuning log](docs/tuning/) documents every step.
+46% personal recall, 3.3pp regression, clean PROMOTE. 16-run tuning log in [`docs/tuning/llama-3.2-1b-instruct-4bit.md`](docs/tuning/llama-3.2-1b-instruct-4bit.md).
+
+### Pass 2 — production tier (Llama 3.1 8B, clean PROMOTE on first calibration)
+
+The locked V1 production recipe runs on `mlx-community/Meta-Llama-3.1-8B-Instruct-4bit`. Full doc: [`docs/tuning/llama-3.1-8b-instruct-4bit.md`](docs/tuning/llama-3.1-8b-instruct-4bit.md).
+
+### Pass 3 — 7-night chained-training drill (compressed long-horizon)
+
+Each night resumes from the prior night's adapter, retrained on the same 50 memories. Single most rigorous test of MORPHEUS to date.
+
+| Night | Decision | Personal | Δ gen |
+|---|---|---|---|
+| 1 | PROMOTE | 43.8% | 0.0pp |
+| 2 | PROMOTE_WITH_WARNING | 58.3% | +10.0pp |
+| 3 | PROMOTE | 66.7% | +3.3pp |
+| 4 | PROMOTE_WITH_WARNING | 75.0% | +13.3pp |
+| 5 | PROMOTE_WITH_WARNING | 75.0% | +6.7pp |
+| 6 | PROMOTE_WITH_WARNING | 81.3% | +10.0pp |
+| 7 | PROMOTE_WITH_WARNING | 75.0% | +6.7pp |
+
+**All 7 nights promoted. Zero rejects.** Personal recall climbs 44% → 81%, plateaus around 75-81%. Regression bounded at 0-13.3pp, never breaches the 15pp REJECT threshold.
+
+### Benchmark suite (against the night-7 live adapter)
+
+| Benchmark | Result |
+|---|---|
+| `personal_recall` (held-out probes) | **75%** (36/48) |
+| `general_capability` | 96.7% base → **90%** adapter (−6.7pp) |
+| `cross_memory_reasoning` 🚀 | **30% base → 90% adapter (+60pp)** |
+| `query_latency` (48-token responses) | p50=**1.08s**, p95=2.25s, p99=2.27s |
+| `identity_drift` | 62.5% base → 75% adapter (−12.5pp = *improvement*) |
+
+**The cross-memory reasoning result is the V2 thesis in microcosm.** Probes that require synthesizing 2-3 memories at once — questions a vector-retrieval system can't answer in a single shot. Base model gets 30%; the dreamed adapter gets 90%. A **three-fold improvement**, clearing the V2.1 success criterion (≥10pp) by **50 points**.
 
 ---
 

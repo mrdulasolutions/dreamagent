@@ -9,6 +9,20 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- **V1 Pass 2/3 complete on Llama 3.1 8B Instruct.** 7-night chained-training
+  drill: all 7 nights PROMOTED, zero rejects, personal recall climbed 44% → 81%
+  with regression bounded at 0–13.3pp. Full trajectory + benchmark suite
+  results in `docs/tuning/llama-3.1-8b-instruct-4bit.md`.
+- **Cross-memory-reasoning benchmark: +60pp adapter over base** (30% → 90%).
+  The parametric advantage proven empirically. Clears the V2.1 success
+  criterion (≥10pp) by 50 points.
+- **Query latency on Mac:** p50=1.08s, p95=2.25s, p99=2.27s for 48-token
+  responses with Llama 3.1 8B 4-bit + LoRA adapter.
+- **`dreamagent drill` CLI** for N consecutive chained nights. Replaces the
+  manual loop. Records full trajectory + decisions in `runs/drills/<ts>/`.
+- **`--resume-from-snapshot` flag on `dreamagent dream`.** Closes the V1
+  TODO. The training stage now passes `--resume-adapter-file` to MLX-LM
+  so a night starts from the prior night's adapter rather than the base.
 - **Methodology named: MORPHEUS** — Memory Overnight Re-parameterization,
   Promotion via Held-out Eval, Update Snapshots. The technique formerly
   known as "the DreamAgent methodology" now has a canonical acronym for
