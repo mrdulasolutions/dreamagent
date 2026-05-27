@@ -16,6 +16,7 @@ editing it.
 | [005](./005-stable-anchor-selection.md) | Stable (by-ID) anchor selection vs random sampling | Accepted |
 | [006](./006-llama-3.2-1b-validation-tier.md) | Llama 3.2 1B Instruct as canonical validation-tier model | Accepted |
 | [007](./007-parametric-vs-retrieval-positioning.md) | Position DreamAgent as parametric memory, not RAG competitor | Accepted |
+| [008](./008-morpheus-methodology-name.md) | Name the methodology MORPHEUS (decouple from project name) | Accepted |
 
 ## Template
 

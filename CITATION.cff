@@ -1,10 +1,11 @@
 # Citation File Format v1.2.0
 # https://citation-file-format.github.io
 cff-version: 1.2.0
-title: "DreamAgent: Nightly LoRA Consolidation of Agent Memories into Model Weights"
+title: "MORPHEUS: Memory Overnight Re-parameterization with Promotion via Held-out Eval and Update Snapshots"
 message: >-
-  If you use this software, the DreamAgent methodology, or derivatives thereof
-  in academic work, please cite as below.
+  If you use this software, the MORPHEUS methodology, or derivatives thereof
+  in academic work, please cite as below. DreamAgent is the canonical
+  reference implementation of MORPHEUS.
 type: software
 authors:
   - name: Mr Dula Solutions, LLC
@@ -12,7 +13,8 @@ authors:
 repository-code: "https://github.com/mrdulasolutions/dreamagent"
 url: "https://github.com/mrdulasolutions/dreamagent"
 abstract: >-
-  DreamAgent is a system and methodology for consolidating AI agent memories
+  MORPHEUS (Memory Overnight Re-parameterization, Promotion via Held-out Eval,
+  Update Snapshots) is a methodology for consolidating AI agent memories
   captured during the day into the weights of a small language model via
   nightly LoRA fine-tuning. By replacing retrieval-based memory with
   parametric memory, the trained "memory specialist" model acts as a
@@ -21,8 +23,11 @@ abstract: >-
   vector retrieval cannot. The methodology includes a structured MemoryItem
   schema, a catastrophic-forgetting–aware rehearsal mix composer, an
   eval-gated promote/rollback pipeline, and a per-model tuning playbook.
+  DreamAgent is the reference implementation, written in Python for Apple
+  Silicon via MLX-LM with cloud-GPU portability via Unsloth.
 license: Apache-2.0
 keywords:
+  - MORPHEUS
   - LoRA
   - fine-tuning
   - agent memory
@@ -37,7 +42,7 @@ date-released: 2026-05-26
 version: 0.0.1
 preferred-citation:
   type: software
-  title: "DreamAgent: Nightly LoRA Consolidation of Agent Memories into Model Weights"
+  title: "MORPHEUS: Memory Overnight Re-parameterization with Promotion via Held-out Eval and Update Snapshots"
   authors:
     - name: Mr Dula Solutions, LLC
   year: 2026

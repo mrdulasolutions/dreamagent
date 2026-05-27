@@ -9,6 +9,11 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- **Methodology named: MORPHEUS** — Memory Overnight Re-parameterization,
+  Promotion via Held-out Eval, Update Snapshots. The technique formerly
+  known as "the DreamAgent methodology" now has a canonical acronym for
+  academic and architectural reference. DreamAgent remains the reference
+  implementation. See [ADR-008](docs/adr/008-morpheus-methodology-name.md).
 - **V1 Phase 1 viability proof.** Clean PROMOTE achieved on Llama 3.2 1B
   Instruct after 16 tuning runs. Locked recipe in
   `docs/tuning/llama-3.2-1b-instruct-4bit.md`.

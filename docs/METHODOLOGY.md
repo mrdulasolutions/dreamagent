@@ -1,23 +1,50 @@
-# The DreamAgent Methodology
+# MORPHEUS — The DreamAgent Methodology
 
 **Originated by:** Mr Dula Solutions, 2026-05-26.
 **License:** Apache 2.0 (code), attribution required for derivative works (see [NOTICE](../NOTICE)).
 
-This document is the canonical description of the technique published in this
-repository. If you build on it, please cite via [CITATION.cff](../CITATION.cff).
+This document is the canonical description of **MORPHEUS** — the technique
+published in this repository and implemented by the DreamAgent project. If you
+build on it, please cite via [CITATION.cff](../CITATION.cff) and credit
+MORPHEUS as the methodology name.
 
 ---
 
-## Definition
+## What is MORPHEUS?
 
-**The DreamAgent methodology** is a system for converting an AI agent's
-captured day-time memories into the **weights** of a small open-source language
-model via **nightly LoRA fine-tuning**, gated by an **automated promote/reject
-eval matrix** and **per-night adapter snapshots** for safe rollback.
+**MORPHEUS** stands for **M**emory **O**vernight **R**e-parameterization,
+**P**romotion via **H**eld-out **E**val, **U**pdate **S**napshots.
 
-The trained model — the "memory specialist" — exposes a knowledge oracle that
-larger frontier agents query at inference time instead of doing vector-based
-retrieval over the original memories.
+It is a system for converting an AI agent's captured day-time memories into the
+**weights** of a small open-source language model via **nightly LoRA
+fine-tuning**, gated by an **automated promote/reject eval matrix** and
+**per-night adapter snapshots** for safe rollback.
+
+Each letter of the acronym maps to a stage or invariant:
+
+| Letter | Concept | Where it lives in the code |
+|---|---|---|
+| **M**emory | Structured `MemoryItem` records as input | `src/dreamagent/schema.py`, `src/dreamagent/ingest/` |
+| **O**vernight | Nightly cron cadence; the model trains while you sleep | `dreamagent install-cron`, `cli.py: dream` |
+| **R**e-parameterization | Memories become **weights**, not retrieved chunks | `src/dreamagent/train/` (LoRA via MLX-LM) |
+| **P**romotion | A gate decides whether each night's adapter goes live | `src/dreamagent/promote/gate.py` |
+| **H**eld-out | Eval probes are deliberately disjoint from training | `src/dreamagent/compose/examples.py` (last template = probe) |
+| **E**val | Personal-recall + general-capability dual checks | `src/dreamagent/eval/`, `benchmarks/` |
+| **U**pdate | LoRA adapter is the atomic update unit | `runs/snapshots/<timestamp>/adapter/` |
+| **S**napshots | Every promoted update is versioned + rollbackable | `src/dreamagent/promote/snapshot.py` |
+
+The trained model — the **memory specialist** — exposes a knowledge oracle
+that larger frontier agents query at inference time instead of doing
+vector-based retrieval over the original memories.
+
+**Project vs. methodology naming:**
+
+- **DreamAgent** — the project, repository, and CLI (`dreamagent dream`, etc.)
+- **MORPHEUS** — the methodology DreamAgent implements
+
+A future implementation of MORPHEUS in another language or framework would
+still be called a MORPHEUS implementation; DreamAgent is the canonical
+reference implementation.
 
 ---
 
@@ -220,16 +247,17 @@ DreamAgent methodology fills that gap.
 ## How to Cite
 
 ```bibtex
-@software{dreamagent2026,
-  title  = {DreamAgent: Nightly LoRA Consolidation of Agent Memories into Model Weights},
+@software{morpheus2026,
+  title  = {MORPHEUS: Memory Overnight Re-parameterization with Promotion via Held-out Eval and Update Snapshots},
   author = {{Mr Dula Solutions}},
   year   = {2026},
   url    = {https://github.com/mrdulasolutions/dreamagent},
-  note   = {Apache-2.0 License with required attribution}
+  note   = {Apache-2.0 License with required attribution. DreamAgent is the reference implementation.}
 }
 ```
 
 Plain text:
 
-> Mr Dula Solutions (2026). *DreamAgent: Nightly LoRA Consolidation of
-> Agent Memories into Model Weights.* https://github.com/mrdulasolutions/dreamagent
+> Mr Dula Solutions (2026). *MORPHEUS: Memory Overnight Re-parameterization
+> with Promotion via Held-out Eval and Update Snapshots.* DreamAgent
+> reference implementation. https://github.com/mrdulasolutions/dreamagent

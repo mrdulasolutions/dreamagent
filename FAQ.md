@@ -2,7 +2,14 @@
 
 ## What is DreamAgent in one sentence?
 
-A system that nightly fine-tunes a small model on your day's memories so the next morning the model knows them from its weights — no retrieval, no vector index, no third-party API.
+DreamAgent is the reference implementation of **MORPHEUS** — Memory Overnight Re-parameterization, Promotion via Held-out Eval, Update Snapshots — a methodology that nightly fine-tunes a small model on your day's memories so the next morning the model knows them from its weights, with no retrieval, no vector index, and no third-party API.
+
+## What's the difference between DreamAgent and MORPHEUS?
+
+- **MORPHEUS** is the methodology — a portable set of techniques, contracts, and gates.
+- **DreamAgent** is the project — the Python codebase, CLI, fixture data, and tuning recipes that implement MORPHEUS on Apple Silicon (with cloud-GPU portability).
+
+A Rust port would still implement MORPHEUS; it just wouldn't be called DreamAgent. This decoupling is documented in [ADR-008](docs/adr/008-morpheus-methodology-name.md).
 
 ## Why not just use mem0 / Letta / Supermemory?
 

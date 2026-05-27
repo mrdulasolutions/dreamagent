@@ -1,7 +1,7 @@
-# DreamAgent
+# DreamAgent · the reference implementation of [MORPHEUS](docs/METHODOLOGY.md)
 
 > **Memories belong in weights, not vectors.**
-> Every other agent memory system in 2026 (mem0, Letta, Supermemory, Zep) consolidates your memories into text you retrieve. DreamAgent consolidates them into **the weights of a small model that runs on your laptop**, via nightly LoRA fine-tuning with eval-gated promotion and one-command rollback. It's the memory specialist your frontier agent calls when it needs to know who you are.
+> Every other agent memory system in 2026 (mem0, Letta, Supermemory, Zep) consolidates your memories into text you retrieve. DreamAgent consolidates them into **the weights of a small model that runs on your laptop**, via the **MORPHEUS** methodology: **M**emory **O**vernight **R**e-parameterization, **P**romotion via **H**eld-out **E**val, **U**pdate **S**napshots. Nightly LoRA fine-tuning, eval-gated promotion, one-command rollback. It's the memory specialist your frontier agent calls when it needs to know who you are.
 
 <p>
   <a href="LICENSE"><img alt="License: Apache 2.0" src="https://img.shields.io/badge/License-Apache_2.0-blue.svg"></a>
@@ -207,14 +207,15 @@ Full version targets and metrics in [`ROADMAP.md`](ROADMAP.md).
 
 Licensed under the **Apache License, Version 2.0**. See [`LICENSE`](LICENSE).
 
-The DreamAgent methodology, prompts, fixture data, tuning playbook, and architectural patterns published in this repository were **originated by Mr Dula Solutions** on **2026-05-26**. Per [`NOTICE`](NOTICE), redistribution and derivative works **must** include attribution:
+The **MORPHEUS** methodology (Memory Overnight Re-parameterization, Promotion via Held-out Eval, Update Snapshots), its prompts, fixture data, tuning playbook, and architectural patterns published in this repository were **originated by Mr Dula Solutions** on **2026-05-26**. DreamAgent is the canonical reference implementation. Per [`NOTICE`](NOTICE), redistribution and derivative works **must** include attribution:
 
-> "Built on the DreamAgent methodology by Mr Dula Solutions
-> (https://github.com/mrdulasolutions/dreamagent)"
+> "Built on MORPHEUS (Memory Overnight Re-parameterization, Promotion via
+> Held-out Eval, Update Snapshots) by Mr Dula Solutions —
+> https://github.com/mrdulasolutions/dreamagent"
 
-If you publish academic work using DreamAgent, cite via [`CITATION.cff`](CITATION.cff).
+If you publish academic work using MORPHEUS or DreamAgent, cite via [`CITATION.cff`](CITATION.cff).
 
-We can't physically stop unauthorized use of the methodology. This repository, its commit history (rooted on the publication date), the dated `NOTICE`, and `CITATION.cff` together establish indisputable provenance — see [ADR-001](docs/adr/001-apache-2.0-with-notice-attribution.md).
+We can't physically stop unauthorized use of the methodology. This repository, its commit history (rooted on the publication date), the dated `NOTICE`, and `CITATION.cff` together establish indisputable provenance — see [ADR-001](docs/adr/001-apache-2.0-with-notice-attribution.md) and [ADR-008](docs/adr/008-morpheus-methodology-name.md).
 
 ---
 
