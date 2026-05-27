@@ -6,13 +6,14 @@ exact commands to run.
 
 | Recipe | What it shows |
 |---|---|
-| [01-quickstart](./01-quickstart/) | The minimum-viable loop on fixture data. 5 minutes start-to-finish. |
+| **[00-five-minutes](./00-five-minutes/)** | **Start here.** Layperson walkthrough — install → dream → connect to Claude Code → ask a question. ~25 min first time. |
+| [01-quickstart](./01-quickstart/) | Terser version of 00 — for repeat use once you know the flow. |
 | [02-extract-from-chat](./02-extract-from-chat/) | Convert a raw chat transcript into MemoryItems using a frontier LLM. |
 | [03-nightly-cron](./03-nightly-cron/) | Install a launchd schedule so your model dreams every night. |
 | [04-bridge-from-mem0](./04-bridge-from-mem0/) | Export memories from mem0 and consolidate them into a dreamed model. |
 | [05-rollback-drill](./05-rollback-drill/) | Intentionally trigger a REJECT and verify the rollback story. |
 | [06-benchmark-suite](./06-benchmark-suite/) | Run the published benchmarks against your own snapshot. |
-| [07-mcp-memory-backend](./07-mcp-memory-backend/) | (V2 preview) Expose the dreamed model as an MCP server. |
+| [07-mcp-memory-backend](./07-mcp-memory-backend/) | (V2.0 live) Expose the dreamed model as an MCP server. Detailed config + Claude Code/Cursor setup. |
 
 Run any example from its directory:
 
